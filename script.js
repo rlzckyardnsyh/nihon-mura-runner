@@ -1871,10 +1871,6 @@ function startGame(){
   const isMobile=('ontouchstart' in window)||navigator.maxTouchPoints>0||window.innerWidth<900;
   if(isMobile){
     document.getElementById('mobileControls').classList.remove('hidden');
-    // Try landscape lock
-    if(screen.orientation&&screen.orientation.lock){
-      screen.orientation.lock('landscape').catch(()=>{});
-    }
   }
   updateHUD();startMusic();S.screen='playing';lastT=performance.now();
   rafId=requestAnimationFrame(gameLoop);
@@ -2286,11 +2282,8 @@ canvas.addEventListener('touchend',e=>{
   }
 },{passive:true});
 
-// Try to lock to landscape on mobile
 function tryLandscape(){
-  if(screen.orientation&&screen.orientation.lock){
-    screen.orientation.lock('landscape').catch(()=>{});
-  }
+  // Portrait mode is fully supported — no landscape lock needed
 }
 document.addEventListener('touchstart',()=>{ tryLandscape(); },{once:true,passive:true});
 document.addEventListener('contextmenu',e=>e.preventDefault());
