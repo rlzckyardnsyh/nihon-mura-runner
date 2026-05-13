@@ -391,20 +391,66 @@ function drawFT(){
 let platforms=[], terrOff=0, nextTerrX=0;
 function initTerrain(){
   platforms=[]; terrOff=0; nextTerrX=900;
-  for(let i=0;i<14;i++){
-    const pw=70+Math.random()*105;
-    platforms.push({x:450+i*310+Math.random()*110, y:GY-(82+Math.random()*88), w:pw, h:14});
+  let lastX=450, lastW=80, lastY=GY-80;
+  const sizes=[55,55,90,90,140,140,200,260,320];
+  let i=0;
+  while(i<12){
+    // Buat grup "tangga naik" 3-4 platform, lalu istirahat, lalu tangga lagi
+    const groupLen = 3 + Math.floor(Math.random()*2); // 3-4 platform per grup
+    const topY = GY - (130 + Math.random()*150); // target puncak grup
+    for(let j=0;j<groupLen&&i<12;j++,i++){
+      const pw = sizes[Math.floor(Math.random()*sizes.length)];
+      const startX = lastX + lastW + 150 + Math.random()*100;
+      // Naik bertahap dari lastY menuju topY
+      const progress = (j+1)/groupLen;
+      const targetY = lastY + (topY - lastY) * progress;
+      // Sedikit random tapi arahnya menuju target
+      const newY = targetY + (Math.random()-0.5)*40;
+      lastY=newY; lastX=startX; lastW=pw;
+      platforms.push({x:startX, y:newY, w:pw, h:14});
+    }
+    // Jeda setelah grup (platform rendah sebagai "landing")
+    if(i<12){
+      const pw = sizes[Math.floor(Math.random()*sizes.length)];
+      const startX = lastX + lastW + 200 + Math.random()*120;
+      const newY = GY - (70 + Math.random()*60); // rendah lagi
+      lastY=newY; lastX=startX; lastW=pw;
+      platforms.push({x:startX, y:newY, w:pw, h:14});
+      i++;
+    }
   }
+  nextTerrX = lastX + lastW + 150 + Math.random()*100;
 }
 function updateTerrain(){
   terrOff+=S.speed;
   for(let i=platforms.length-1;i>=0;i--){
     if(platforms[i].x-terrOff+platforms[i].w<-80) platforms.splice(i,1);
   }
-  while(nextTerrX-terrOff<W+600){
-    const pw=70+Math.random()*110;
-    platforms.push({x:nextTerrX, y:GY-(80+Math.random()*90), w:pw, h:14});
-    nextTerrX+=270+Math.random()*230;
+  const sizes=[55,55,90,90,140,140,200,260,320];
+  // Spawn dalam pola tangga naik
+  while(nextTerrX-terrOff<W+800){
+    const lastPlat=platforms[platforms.length-1];
+    const lastY=lastPlat?lastPlat.y:GY-80;
+    const lastW=lastPlat?lastPlat.w:80;
+
+    // Tentukan apakah naik, turun, atau datar berdasarkan posisi terakhir
+    let newY;
+    if(lastY > GY-100){
+      // Sedang rendah → mulai naik
+      newY = lastY - (40 + Math.random()*50);
+    } else if(lastY < GY-200){
+      // Sudah sangat tinggi → turun dulu
+      newY = lastY + (40 + Math.random()*60);
+    } else {
+      // Di tengah → bisa naik atau turun sedikit
+      newY = lastY + (Math.random()<0.6 ? -1 : 1) * (30 + Math.random()*55);
+    }
+    // Clamp agar tidak keluar layar
+    newY = Math.max(GY-280, Math.min(GY-65, newY));
+
+    const pw = sizes[Math.floor(Math.random()*sizes.length)];
+    platforms.push({x:nextTerrX, y:newY, w:pw, h:14});
+    nextTerrX += pw + 150 + Math.random()*140;
   }
 }
 function checkPlatColl(){
@@ -1206,8 +1252,7 @@ const OBS_TYPES=[
   {id:'crate',w:38,h:38,dmg:14,t:'ground',draw(c,x,y,w,h){c.fillStyle='#9a7030';rRect(c,x,y,w,h,3);c.fill();c.strokeStyle='#5a3a10';c.lineWidth=2;c.strokeRect(x+2,y+2,w-4,h-4);c.beginPath();c.moveTo(x,y);c.lineTo(x+w,y+h);c.stroke();c.beginPath();c.moveTo(x+w,y);c.lineTo(x,y+h);c.stroke();c.fillStyle='rgba(200,160,60,0.6)';c.font=`bold 8px 'Noto Serif JP',serif`;c.textAlign='center';c.textBaseline='middle';c.fillText('木箱',x+w/2,y+h/2);}},
   {id:'stone',w:44,h:28,dmg:12,t:'ground',draw(c,x,y,w,h){const g=c.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,'#8a7560');g.addColorStop(0.5,'#6b5c48');g.addColorStop(1,'#4a3d30');c.fillStyle=g;c.shadowBlur=5;c.shadowColor='rgba(60,40,20,0.4)';c.beginPath();c.moveTo(x+w*0.15,y);c.lineTo(x+w*0.85,y);c.lineTo(x+w,y+h*0.4);c.lineTo(x+w*0.9,y+h);c.lineTo(x+w*0.1,y+h);c.lineTo(x,y+h*0.5);c.closePath();c.fill();c.shadowBlur=0;}},
   {id:'cart',w:64,h:36,dmg:16,t:'ground',draw(c,x,y,w,h){c.fillStyle='#8a5a20';rRect(c,x,y,w,h-12,4);c.fill();c.fillStyle='#5a3010';c.beginPath();c.arc(x+12,y+h-8,9,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+w-12,y+h-8,9,0,Math.PI*2);c.fill();c.fillStyle='rgba(60,40,10,0.5)';c.beginPath();c.arc(x+12,y+h-8,4,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+w-12,y+h-8,4,0,Math.PI*2);c.fill();c.fillStyle='rgba(180,140,60,0.7)';c.font=`bold 7px 'Noto Serif JP',serif`;c.textAlign='center';c.textBaseline='middle';c.fillText('荷車',x+w/2,y+h*0.4);}},
-  {id:'bamboogate',w:68,h:18,dmg:8,t:'high',yOff:0.52,draw(c,x,y,w,h){c.strokeStyle='#5a8a20';c.lineWidth=h*0.5;c.shadowBlur=4;c.shadowColor='rgba(60,140,20,0.35)';c.beginPath();c.moveTo(x,y+h/2);c.quadraticCurveTo(x+w/2,y+h*0.82,x+w,y+h/2);c.stroke();c.fillStyle='#4a7010';c.fillRect(x-4,y-22,8,h+26);c.fillRect(x+w-4,y-22,8,h+26);c.fillStyle='rgba(100,160,30,0.88)';c.shadowColor='rgba(80,160,20,0.5)';c.shadowBlur=7;c.fillRect(x+w*0.35,y-16,10,18);c.fillRect(x+w*0.6,y-16,10,18);c.shadowBlur=0;}},
-  {id:'lowbar',w:65,h:16,dmg:8,t:'high',yOff:0.46,draw(c,x,y,w,h){c.strokeStyle='#8b6914';c.lineWidth=h*0.5;c.shadowBlur=4;c.shadowColor='rgba(140,100,0,0.4)';c.beginPath();c.moveTo(x,y+h/2);c.quadraticCurveTo(x+w/2,y+h*0.75,x+w,y+h/2);c.stroke();c.fillStyle='#5a3a00';c.fillRect(x-4,y-22,8,h+26);c.fillRect(x+w-4,y-22,8,h+26);}},
+
 ];
 function spawnObs(){
   const t=OBS_TYPES[Math.floor(Math.random()*OBS_TYPES.length)];
@@ -1249,6 +1294,8 @@ function drawObs(){
     ctx.shadowBlur=12; ctx.shadowColor='rgba(255,0,30,0.9)';
     ctx.fillText('✕ DANGER',cx,topY);
     ctx.shadowBlur=0;
+
+
 
     // Red diagonal stripes on ground shadow to warn of area
     ctx.globalAlpha=0.18;
@@ -1323,7 +1370,15 @@ const EBase={
     }
 
     // ── GROUND enemies ──
+    // Kalau player sudah melewati enemy (player ada di kanan enemy), enemy terus jalan ke kiri
+    if(this.x + this.w < Player.x - 30){
+      this.aiState = 'passed';
+    }
     switch(this.aiState){
+      case 'passed':
+        // Terus jalan ke kiri mengikuti scroll dunia
+        this.vx = -S.speed;
+        break;
       case 'approach':
         // Move toward player AND subtract world scroll so enemy catches player
         this.vx = (dx<0?-1:1)*this.speed*dp.enmSpd - S.speed*0.88;
@@ -1361,7 +1416,10 @@ const EBase={
     this.y+=this.vy; this.x+=this.vx;
     if(this.y>=GY-this.h){this.y=GY-this.h;this.vy=0;}
     if(this.y<0){this.y=0;this.vy=0;}
-    this.x=Math.max(Player.x-120,Math.min(W+220,this.x));
+    // Kalau enemy sudah dilewati player (di kiri player), jangan tarik balik — biarkan terus ke kiri
+    if(this.x + this.w > Player.x){
+      this.x=Math.max(Player.x-120,Math.min(W+220,this.x));
+    }
   },
   shootBullet(){
     if(!this.canShoot)return;SFX.enemyShoot();

@@ -1758,78 +1758,100 @@ body.modal-open {
   ::-webkit-scrollbar-thumb { background: rgba(255,107,26,0.4); }
 }
 /* =================================================================
-   MOBILE RESPONSIVE OVERHAUL v3
-   Landscape phone: max-width 900px (width saat landscape)
-   Portrait phone: max-width 500px
-   Samsung A35: 1080x2340 → landscape = width:2340, height:1080
-   Pakai max-width bukan max-height untuk landscape phone detection
+   MOBILE RESPONSIVE v4 — Landscape phone fix
+   Target: HP landscape, Samsung A35 = ~851px CSS width landscape
+   JANGAN ubah portrait — game hanya untuk landscape
    ================================================================= */
 
-/* ===================================================
-   LANDSCAPE MOBILE — deteksi via max-width + landscape
-   Phone landscape biasanya width < 1000px di CSS pixels
-   (device pixel ratio ~2-3x, jadi 2340/2.75 ≈ 851px CSS)
-   =================================================== */
-
-@media (max-width: 900px) and (orientation: landscape) {
-
-  /* ── MAIN MENU ── */
-  .menu-ui {
-    flex-direction: row;
+/* ── ROTATE HINT untuk portrait ── */
+@media (orientation: portrait) {
+  #rotateHint {
+    display: flex !important;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #04010a;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(1rem, 3vw, 3rem);
-    padding: 0.5rem 2rem;
+    gap: 1rem;
+  }
+}
+
+/* ── SEMBUNYIKAN game saat portrait ── */
+@media (orientation: portrait) {
+  #mainMenu,
+  #charSelectScreen,
+  #envSelectScreen,
+  #howToPlay,
+  #pauseScreen,
+  #gameOverScreen,
+  #loadingScreen,
+  #gameCanvas,
+  #hud,
+  #mobileControls {
+    display: none !important;
+  }
+}
+
+/* ── MAIN MENU — landscape phone ── */
+@media (max-width: 900px) and (orientation: landscape) {
+
+  /* Menu tetap vertikal tapi lebih compact */
+  .menu-ui {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.3rem, 1.5vh, 1rem) 2rem;
+    gap: 0;
   }
 
   .menu-logo-block {
-    margin-bottom: 0;
-    flex-shrink: 0;
-    width: clamp(160px, 28vw, 260px);
+    margin-bottom: clamp(0.3rem, 1.5vh, 1rem);
     text-align: center;
   }
 
   .mlb-tag {
-    font-size: clamp(0.4rem, 1.2vw, 0.6rem);
-    letter-spacing: 0.15em;
+    font-size: clamp(0.42rem, 1.5vw, 0.6rem);
+    letter-spacing: 0.2em;
     margin-bottom: 0.1rem;
   }
 
   .mlb-title-jp {
-    font-size: clamp(0.7rem, 2vw, 1.1rem);
-    letter-spacing: 0.12em;
+    font-size: clamp(0.7rem, 2.2vw, 1.1rem);
+    letter-spacing: 0.15em;
     margin-bottom: 0.05rem;
   }
 
   .mlb-title {
-    font-size: clamp(1.4rem, 5vw, 2.8rem);
-    line-height: 0.9;
-    letter-spacing: 0.02em;
+    font-size: clamp(1.6rem, 6vw, 3rem);
+    line-height: 0.92;
+    letter-spacing: 0.03em;
   }
 
   .mlb-line {
-    width: 40px;
-    margin: 0.3rem auto 0;
+    width: 50px;
+    margin: 0.25rem auto 0;
   }
 
   .menu-nav {
-    gap: clamp(0.25rem, 0.8vh, 0.5rem);
-    max-width: clamp(180px, 30vw, 280px);
-    margin-bottom: 0;
-    flex: 1;
+    gap: clamp(0.22rem, 1vh, 0.45rem);
+    max-width: clamp(200px, 35vw, 300px);
+    margin-bottom: clamp(0.3rem, 1.5vh, 0.8rem);
+    width: 100%;
   }
 
   .mnav-btn {
-    font-size: clamp(0.55rem, 1.6vw, 0.8rem);
-    padding: clamp(0.4em, 1vh, 0.7em) 1em;
-    letter-spacing: 0.06em;
+    font-size: clamp(0.58rem, 1.8vw, 0.82rem);
+    padding: clamp(0.38em, 1.2vh, 0.65em) 1.2em;
+    letter-spacing: 0.08em;
     border-radius: 7px;
-    min-height: clamp(32px, 6vh, 44px);
+    min-height: clamp(30px, 7vh, 42px);
   }
 
   .mnav-play {
-    font-size: clamp(0.6rem, 1.8vw, 0.85rem) !important;
-    padding: clamp(0.45em, 1.1vh, 0.75em) 1em !important;
+    font-size: clamp(0.62rem, 2vw, 0.88rem) !important;
+    padding: clamp(0.42em, 1.3vh, 0.7em) 1.2em !important;
   }
 
   .micon {
@@ -1837,75 +1859,88 @@ body.modal-open {
     height: clamp(12px, 2vw, 16px);
   }
 
+  /* Tampilkan menu-bottom tapi compact */
   .menu-bottom {
-    display: none;
+    display: block;
+    text-align: center;
   }
 
-  /* ── CHARACTER SELECT ── */
+  .menu-score-row {
+    padding: 0.25em 0.8em;
+    margin-bottom: 0.3rem;
+  }
+
+  .msr-val {
+    font-size: clamp(0.7rem, 2vw, 0.95rem);
+  }
+
+  .msr-label {
+    font-size: 0.48rem;
+  }
+
+  .menu-hint {
+    font-size: 0.42rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .menu-credit {
+    font-size: clamp(0.55rem, 1.5vw, 0.7rem);
+  }
+}
+
+/* ── CHARACTER SELECT — landscape phone ── */
+@media (max-width: 900px) and (orientation: landscape) {
+
   .char-select-ui {
-    width: min(94vw, 780px);
-    max-height: 94vh;
+    width: min(96vw, 760px);
+    max-height: 96vh;
     border-radius: var(--r-lg);
   }
 
   .cs-header {
-    padding: clamp(0.4rem, 1.2vh, 0.8rem) 3rem clamp(0.3rem, 1vh, 0.6rem);
+    padding: clamp(0.35rem, 1.2vh, 0.7rem) 3rem clamp(0.28rem, 1vh, 0.55rem);
   }
 
   .cs-title {
-    font-size: clamp(0.55rem, 1.5vw, 0.85rem);
+    font-size: clamp(0.55rem, 1.6vw, 0.85rem);
     letter-spacing: 0.2em;
   }
 
-  .cs-sub {
-    font-size: clamp(0.42rem, 1.1vw, 0.6rem);
-    margin-top: 1px;
-  }
-
   .cs-layout {
-    grid-template-columns: clamp(130px, 22vw, 200px) 1fr;
-    padding: clamp(0.5rem, 1.5vh, 1rem) clamp(0.8rem, 2vw, 1.5rem) 0;
+    grid-template-columns: clamp(130px, 20vw, 190px) 1fr;
+    padding: clamp(0.4rem, 1.5vh, 0.9rem) clamp(0.7rem, 2vw, 1.4rem) 0;
   }
 
   .cs-spotlight { display: none; }
 
   .char-preview-canvas {
-    width: clamp(110px, 20vw, 170px);
-    height: clamp(140px, 26vw, 215px);
+    width: clamp(100px, 18vw, 160px);
+    height: clamp(128px, 23vw, 205px);
   }
 
   .cs-nav-btn {
-    width: clamp(24px, 4vw, 32px);
-    height: clamp(24px, 4vw, 32px);
+    width: clamp(24px, 3.5vw, 32px);
+    height: clamp(24px, 3.5vw, 32px);
   }
 
   .cs-info-col {
-    padding-left: clamp(0.7rem, 2vw, 1.5rem);
+    padding-left: clamp(0.7rem, 2vw, 1.4rem);
     overflow-y: auto;
-    max-height: calc(94vh - 130px);
-  }
-
-  .cs-rarity-badge {
-    font-size: clamp(0.4rem, 1.1vw, 0.55rem);
-    margin-bottom: 0.2rem;
+    max-height: calc(96vh - 120px);
   }
 
   .cs-char-name {
     font-size: clamp(1.1rem, 3.5vw, 2rem);
-    margin-bottom: 0.08rem;
   }
 
   .cs-char-role {
-    font-size: clamp(0.5rem, 1.4vw, 0.7rem);
+    font-size: clamp(0.5rem, 1.4vw, 0.68rem);
     letter-spacing: 0.12em;
     margin-bottom: 0.3rem;
   }
 
-  .cs-divider { margin-bottom: 0.3rem; }
-
   .cs-char-desc {
     font-size: clamp(0.58rem, 1.5vw, 0.72rem);
-    line-height: 1.4;
     margin-bottom: 0.4rem;
     -webkit-line-clamp: 2;
     overflow: hidden;
@@ -1914,67 +1949,73 @@ body.modal-open {
   }
 
   .cs-stats-block {
-    gap: 0.22rem;
-    margin-bottom: 0.4rem;
-    padding: 0.35rem 0.55rem;
+    gap: 0.2rem;
+    margin-bottom: 0.35rem;
+    padding: 0.3rem 0.5rem;
   }
 
-  .cs-stat-label { font-size: clamp(0.4rem, 1vw, 0.52rem); width: 42px; }
-  .cs-stat-num   { font-size: clamp(0.44rem, 1.1vw, 0.55rem); }
-
-  .cs-skill-block { margin-bottom: 0.3rem; gap: 0.3rem; }
-  .cs-skill-tag   { font-size: clamp(0.4rem, 1vw, 0.52rem); padding: 0.2em 0.45em; }
-  .cs-skill-name  { font-size: clamp(0.44rem, 1.1vw, 0.55rem); }
-  .cs-skill-desc  { font-size: clamp(0.36rem, 0.9vw, 0.46rem); }
-  .cs-weapon-label{ font-size: clamp(0.44rem, 1.1vw, 0.56rem); }
+  .cs-stat-label { font-size: clamp(0.4rem, 1.1vw, 0.52rem); width: 42px; }
+  .cs-stat-num   { font-size: clamp(0.44rem, 1.2vw, 0.55rem); }
+  .cs-skill-block{ margin-bottom: 0.28rem; gap: 0.28rem; }
+  .cs-skill-tag  { font-size: clamp(0.4rem, 1vw, 0.52rem); padding: 0.18em 0.42em; }
+  .cs-weapon-label { font-size: clamp(0.44rem, 1.1vw, 0.56rem); }
 
   .cs-bottom-bar {
-    padding: clamp(0.45rem, 1.2vh, 0.8rem) clamp(0.8rem, 2vw, 1.5rem) clamp(0.6rem, 1.5vh, 1rem);
-    gap: 0.5rem;
+    padding: clamp(0.4rem, 1.2vh, 0.7rem) clamp(0.7rem, 2vw, 1.4rem) clamp(0.5rem, 1.5vh, 0.9rem);
   }
 
-  .cs-selected-tag { font-size: clamp(0.42rem, 1vw, 0.58rem); }
+  .cs-selected-tag { font-size: clamp(0.42rem, 1.1vw, 0.58rem); }
 
   .confirm-btn {
-    font-size: clamp(0.6rem, 1.6vw, 0.82rem);
-    padding: clamp(0.45em, 1.1vh, 0.7em) clamp(0.9em, 2vw, 1.6em);
-    min-height: clamp(32px, 5.5vh, 42px);
+    font-size: clamp(0.6rem, 1.7vw, 0.82rem);
+    padding: clamp(0.42em, 1.2vh, 0.68em) clamp(0.9em, 2.2vw, 1.5em);
+    min-height: clamp(32px, 6vh, 42px);
   }
 
   .close-x {
-    width: clamp(28px, 4.5vw, 38px);
-    height: clamp(28px, 4.5vw, 38px);
-    top: 0.5rem;
-    right: 0.5rem;
+    width: clamp(28px, 4vw, 36px);
+    height: clamp(28px, 4vw, 36px);
+    top: 0.45rem;
+    right: 0.45rem;
   }
+}
 
-  /* ── ENVIRONMENT SELECT ── */
+/* ── ENVIRONMENT SELECT — landscape phone ── */
+@media (max-width: 900px) and (orientation: landscape) {
+
   #envSelectScreen {
-    overflow-y: auto;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
   }
 
   .env-select-ui {
-    padding: clamp(0.5rem, 1.5vh, 1.2rem) clamp(0.8rem, 2vw, 1.5rem);
-    gap: clamp(0.4rem, 1.2vh, 0.8rem);
+    padding: clamp(0.4rem, 1.5vh, 1rem) clamp(0.8rem, 2vw, 1.5rem);
+    gap: clamp(0.35rem, 1.2vh, 0.7rem);
+    align-items: center;
+    width: 100%;
+    max-width: 900px;
   }
+
+  .es-header { text-align: center; }
 
   .es-title {
     font-size: clamp(0.85rem, 2.5vw, 1.3rem);
-    letter-spacing: 0.1em;
-  }
-
-  .es-sub {
-    font-size: clamp(0.48rem, 1.2vw, 0.65rem);
     letter-spacing: 0.12em;
   }
 
+  .es-sub {
+    font-size: clamp(0.48rem, 1.3vw, 0.65rem);
+  }
+
+  /* Kartu environment horizontal scroll jika tidak muat */
   .env-cards-row {
     gap: clamp(0.35rem, 1vw, 0.7rem);
+    justify-content: center;
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
-    padding-bottom: 0.4rem;
+    padding-bottom: 0.3rem;
     scrollbar-width: none;
     width: 100%;
   }
@@ -1982,65 +2023,70 @@ body.modal-open {
   .env-cards-row::-webkit-scrollbar { display: none; }
 
   .env-card {
-    flex: 0 0 clamp(100px, 16vw, 150px);
-    min-width: 90px;
+    flex: 0 0 clamp(110px, 17vw, 155px);
+    min-width: 100px;
   }
 
-  .ec-thumb { height: clamp(50px, 9vh, 80px); }
+  .ec-thumb { height: clamp(55px, 10vh, 85px); }
 
   .ec-info {
-    padding: clamp(0.25rem, 0.7vh, 0.4rem) clamp(0.4rem, 1vw, 0.6rem);
-    gap: 1px;
+    padding: clamp(0.28rem, 0.8vh, 0.45rem) clamp(0.4rem, 1vw, 0.6rem);
   }
 
-  .ec-icon  { font-size: clamp(0.7rem, 1.8vw, 1rem); }
-  .ec-name  { font-size: clamp(0.46rem, 1.2vw, 0.6rem); }
-  .ec-jp    { font-size: clamp(0.38rem, 1vw, 0.52rem); }
+  .ec-icon { font-size: clamp(0.72rem, 1.8vw, 1rem); }
+  .ec-name { font-size: clamp(0.48rem, 1.3vw, 0.62rem); }
+  .ec-jp   { font-size: clamp(0.4rem, 1.1vw, 0.55rem); }
 
   .env-desc-panel {
     font-size: clamp(0.58rem, 1.5vw, 0.72rem);
     padding: clamp(0.35rem, 1vh, 0.6rem) clamp(0.6rem, 1.5vw, 0.9rem);
-    max-width: 100%;
+    max-width: min(520px, 90vw);
+    text-align: center;
   }
+}
 
-  /* ── SETTINGS MODAL ── */
+/* ── SETTINGS MODAL — landscape phone ── */
+@media (max-width: 900px) and (orientation: landscape) {
+
   .modal-backdrop { padding: clamp(0.5rem, 1.5vh, 1rem); }
 
   .modal-box {
     max-height: 92vh;
-    padding: clamp(0.8rem, 2vh, 1.5rem) clamp(0.9rem, 2.5vw, 1.8rem);
+    padding: clamp(0.75rem, 2vh, 1.4rem) clamp(0.9rem, 2.5vw, 1.7rem);
     border-radius: var(--r-lg);
   }
 
   .modal-title {
-    font-size: clamp(0.82rem, 2.2vw, 1.2rem);
+    font-size: clamp(0.82rem, 2.3vw, 1.2rem);
     letter-spacing: 0.12em;
     padding-right: 2.2rem;
   }
 
   .modal-sub {
-    font-size: clamp(0.5rem, 1.2vw, 0.62rem);
-    margin-bottom: 0.8rem;
+    font-size: clamp(0.5rem, 1.3vw, 0.62rem);
+    margin-bottom: 0.7rem;
   }
 
-  .settings-body { gap: clamp(0.3rem, 1vh, 0.55rem); }
+  .settings-body { gap: clamp(0.28rem, 1vh, 0.5rem); }
 
   .set-card {
-    padding: clamp(0.4rem, 1.2vh, 0.65rem) clamp(0.55rem, 1.5vw, 0.85rem);
-    gap: clamp(0.4rem, 1.2vw, 0.65rem);
+    padding: clamp(0.38rem, 1.2vh, 0.62rem) clamp(0.5rem, 1.5vw, 0.85rem);
+    gap: clamp(0.38rem, 1.2vw, 0.65rem);
     border-radius: 8px;
   }
 
-  .set-icon svg  { width: clamp(14px, 2.5vw, 18px); height: clamp(14px, 2.5vw, 18px); }
+  .set-icon svg  { width: clamp(14px, 2.2vw, 18px); height: clamp(14px, 2.2vw, 18px); }
   .set-info      { flex: 0 0 clamp(50px, 8vw, 70px); }
   .set-label     { font-size: clamp(0.5rem, 1.4vw, 0.65rem); }
   .set-val       { font-size: clamp(0.52rem, 1.4vw, 0.68rem); }
-  .ntr-slider    { min-width: 50px; }
   .seg-b         { font-size: clamp(0.46rem, 1.2vw, 0.6rem); padding: 0.22em 0.45em; }
   .pill-btn      { font-size: clamp(0.52rem, 1.4vw, 0.68rem); padding: 0.32em 0.75em; }
+}
 
-  /* ── HOW TO PLAY ── */
-  .htp-overlay { padding: clamp(0.4rem, 1vh, 0.8rem); }
+/* ── HOW TO PLAY — landscape phone ── */
+@media (max-width: 900px) and (orientation: landscape) {
+
+  .htp-overlay { padding: clamp(0.4rem, 1.2vh, 0.8rem); }
 
   .htp-panel {
     width: min(96vw, 750px);
@@ -2050,199 +2096,126 @@ body.modal-open {
 
   .htp-close-btn {
     top: 10px; right: 10px;
-    width: clamp(28px, 4.5vw, 36px);
-    height: clamp(28px, 4.5vw, 36px);
+    width: clamp(28px, 4vw, 36px);
+    height: clamp(28px, 4vw, 36px);
   }
 
   .htp-header {
-    padding: clamp(0.55rem, 1.5vh, 1rem) clamp(0.9rem, 2.5vw, 1.4rem) clamp(0.45rem, 1.2vh, 0.8rem);
+    padding: clamp(0.5rem, 1.5vh, 0.9rem) clamp(0.9rem, 2.5vw, 1.4rem) clamp(0.4rem, 1.2vh, 0.75rem);
     gap: clamp(0.5rem, 1.5vw, 0.9rem);
   }
 
-  .htp-header-icon  { font-size: clamp(1.2rem, 3vw, 1.8rem); }
-  .htp-title-text   { font-size: clamp(0.8rem, 2.2vw, 1.2rem); letter-spacing: 0.12em; }
-  .htp-subtitle-text{ font-size: clamp(0.44rem, 1.1vw, 0.58rem); }
+  .htp-header-icon   { font-size: clamp(1.2rem, 3vw, 1.8rem); }
+  .htp-title-text    { font-size: clamp(0.8rem, 2.2vw, 1.2rem); letter-spacing: 0.12em; }
+  .htp-subtitle-text { font-size: clamp(0.44rem, 1.1vw, 0.58rem); }
 
-  .htp-scroll { padding: clamp(0.7rem, 2vh, 1.1rem) clamp(0.8rem, 2.2vw, 1.3rem) clamp(0.9rem, 2.5vh, 1.5rem); }
-  .htp-section { margin-bottom: clamp(0.7rem, 2vh, 1.2rem); }
-  .htp-section-title { font-size: clamp(0.55rem, 1.5vw, 0.7rem); letter-spacing: 0.12em; }
-  .htp-section-icon  { font-size: clamp(0.8rem, 2vw, 1rem); }
+  .htp-scroll { padding: clamp(0.6rem, 1.8vh, 1rem) clamp(0.7rem, 2vw, 1.2rem) clamp(0.8rem, 2.2vh, 1.4rem); }
+  .htp-section { margin-bottom: clamp(0.6rem, 1.8vh, 1.1rem); }
+  .htp-section-title { font-size: clamp(0.55rem, 1.5vw, 0.7rem); }
 
-  .htp-controls-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.35rem; }
-  .htp-ctrl-card     { padding: clamp(0.35rem, 1vh, 0.55rem) clamp(0.5rem, 1.3vw, 0.75rem); border-radius: 7px; }
+  .htp-controls-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.32rem; }
+  .htp-ctrl-card     { padding: clamp(0.32rem, 1vh, 0.52rem) clamp(0.48rem, 1.3vw, 0.72rem); }
   .htp-ctrl-key      { font-size: clamp(0.46rem, 1.2vw, 0.58rem); }
-  .htp-ctrl-act      { font-size: clamp(0.54rem, 1.4vw, 0.68rem); }
+  .htp-ctrl-act      { font-size: clamp(0.54rem, 1.4vw, 0.66rem); }
 
-  .htp-enemies-grid  { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.45rem; }
-  .htp-enemy-card    { padding: clamp(0.5rem, 1.3vh, 0.75rem) clamp(0.6rem, 1.6vw, 0.85rem); gap: 0.55rem; }
-  .htp-enemy-avatar  { width: clamp(34px, 5.5vw, 44px); height: clamp(34px, 5.5vw, 44px); font-size: clamp(1rem, 2.5vw, 1.4rem); }
+  .htp-enemies-grid  { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.42rem; }
+  .htp-enemy-card    { padding: clamp(0.48rem, 1.3vh, 0.72rem) clamp(0.58rem, 1.5vw, 0.82rem); }
+  .htp-enemy-avatar  { width: clamp(34px, 5vw, 44px); height: clamp(34px, 5vw, 44px); }
   .htp-enemy-name    { font-size: clamp(0.6rem, 1.5vw, 0.72rem); }
   .htp-enemy-desc    { font-size: clamp(0.52rem, 1.3vw, 0.62rem); }
 
-  .htp-item-row { font-size: clamp(0.54rem, 1.4vw, 0.64rem); padding: clamp(0.28rem, 0.8vh, 0.4rem) clamp(0.4rem, 1.1vw, 0.55rem); }
-  .htp-item-icon{ width: clamp(22px, 3.5vw, 28px); height: clamp(22px, 3.5vw, 28px); font-size: clamp(0.8rem, 2vw, 0.95rem); }
-  .htp-obs-row  { font-size: clamp(0.54rem, 1.4vw, 0.64rem); padding: clamp(0.28rem, 0.8vh, 0.4rem) clamp(0.4rem, 1.1vw, 0.55rem); }
-  .htp-obs-tag  { font-size: clamp(0.4rem, 1vw, 0.48rem); }
+  .htp-item-row { font-size: clamp(0.54rem, 1.4vw, 0.64rem); }
+  .htp-obs-row  { font-size: clamp(0.54rem, 1.4vw, 0.64rem); }
   .htp-tip-pill { font-size: clamp(0.48rem, 1.2vw, 0.6rem); }
+}
 
-  /* ── PAUSE MENU ── */
+/* ── PAUSE MENU — landscape phone ── */
+@media (max-width: 900px) and (orientation: landscape) {
+
   .pause-card {
-    width: min(400px, 85vw);
-    padding: clamp(0.8rem, 2.5vh, 1.5rem) clamp(1rem, 3vw, 1.8rem);
+    width: min(420px, 82vw);
+    padding: clamp(0.7rem, 2.2vh, 1.3rem) clamp(1rem, 3vw, 1.8rem);
     border-radius: var(--r-lg);
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
   }
 
-  .pause-logo { display: none; }
+  .pause-logo { margin-bottom: 0.3rem; }
+  .pause-logo svg { width: clamp(20px, 3.5vw, 30px); height: clamp(20px, 3.5vw, 30px); }
 
   .pause-title {
-    font-size: clamp(1rem, 3.5vw, 1.6rem);
-    letter-spacing: 0.1em;
+    font-size: clamp(1.1rem, 3.5vw, 1.7rem);
+    letter-spacing: 0.15em;
   }
 
   .pause-sub {
     font-size: clamp(0.5rem, 1.3vw, 0.65rem);
-    margin-bottom: 0;
-    align-self: center;
+    margin-bottom: clamp(0.6rem, 2vh, 1.2rem);
   }
 
   .pause-actions {
-    width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: clamp(0.3rem, 0.9vh, 0.5rem);
+    gap: clamp(0.28rem, 1vh, 0.5rem);
   }
 
+  .pause-btn-primary { grid-column: 1 / -1; }
+
   .pause-btn {
-    font-size: clamp(0.6rem, 1.6vw, 0.82rem);
-    padding: clamp(0.45em, 1.2vh, 0.72em) 0.9em;
+    font-size: clamp(0.6rem, 1.7vw, 0.82rem);
+    padding: clamp(0.42em, 1.3vh, 0.7em) 0.9em;
     letter-spacing: 0.06em;
     border-radius: 7px;
-    min-height: clamp(34px, 6vh, 44px);
+    min-height: clamp(32px, 6.5vh, 44px);
     gap: 0.4em;
   }
 
   .pause-btn svg { width: clamp(13px, 2.2vw, 18px); height: clamp(13px, 2.2vw, 18px); }
-  .pause-btn-primary { grid-column: 1 / -1; }
+}
 
-  /* ── GAME OVER ── */
+/* ── GAME OVER — landscape phone ── */
+@media (max-width: 900px) and (orientation: landscape) {
+
   .go-box {
-    max-width: min(460px, 92vw) !important;
-    padding: clamp(0.8rem, 2.5vh, 1.5rem) clamp(0.9rem, 2.5vw, 1.6rem) !important;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    gap: 0.5rem;
-    align-items: flex-start;
+    max-width: min(460px, 90vw) !important;
+    padding: clamp(0.7rem, 2.2vh, 1.4rem) clamp(0.9rem, 2.5vw, 1.6rem) !important;
   }
 
-  .go-icon-row { display: none; }
+  .go-icon-row svg { width: clamp(32px, 5vw, 44px); height: clamp(32px, 5vw, 44px); }
+  .go-icon-row { margin-bottom: 0.3rem; }
 
   .go-title {
-    font-size: clamp(1rem, 3vw, 1.6rem);
-    letter-spacing: 0.08em;
-    width: 100%;
+    font-size: clamp(1rem, 3.2vw, 1.7rem);
+    letter-spacing: 0.1em;
   }
 
   .go-sub {
     font-size: clamp(0.5rem, 1.3vw, 0.65rem);
-    margin-bottom: 0.4rem;
-    width: 100%;
+    margin-bottom: 0.6rem;
   }
 
-  .go-stats {
-    flex: 1;
-    margin-bottom: 0;
-    min-width: 150px;
-  }
+  .go-stats { margin-bottom: 0.5rem; }
 
   .go-stat {
-    padding: clamp(0.25rem, 0.8vh, 0.4rem) 0.2rem;
+    padding: clamp(0.28rem, 0.9vh, 0.42rem) 0.25rem;
     font-size: clamp(0.62rem, 1.6vw, 0.78rem);
   }
 
   .go-val { font-size: clamp(0.72rem, 1.9vw, 0.95rem); }
 
-  .go-record {
-    font-size: clamp(0.65rem, 1.7vw, 0.85rem);
-    margin-bottom: 0.4rem;
-    width: 100%;
-  }
-
-  .go-btns {
-    flex-direction: column;
-    gap: 0.35rem;
-    align-self: center;
-    justify-content: center;
-  }
+  .go-btns { gap: 0.45rem; }
 
   .go-btns .confirm-btn {
-    font-size: clamp(0.62rem, 1.6vw, 0.82rem);
-    padding: clamp(0.45em, 1.2vh, 0.7em) clamp(0.8em, 2vw, 1.3em);
-    min-height: clamp(34px, 6vh, 44px);
-    justify-content: center;
+    font-size: clamp(0.62rem, 1.7vw, 0.82rem);
+    padding: clamp(0.45em, 1.3vh, 0.7em) clamp(0.9em, 2.2vw, 1.4em);
+    min-height: clamp(34px, 6.5vh, 44px);
   }
 
   .go-btns .pill-btn {
     font-size: clamp(0.58rem, 1.5vw, 0.72rem);
-    padding: clamp(0.38em, 1vh, 0.55em) clamp(0.7em, 1.8vw, 1em);
-    min-height: clamp(32px, 5.5vh, 40px);
-    justify-content: center;
+    padding: clamp(0.4em, 1.1vh, 0.58em) clamp(0.8em, 1.8vw, 1.1em);
+    min-height: clamp(32px, 6vh, 40px);
   }
 
-  /* ── HUD ── */
-  .hud-bl { bottom: 80px; left: 8px; }
-  .hud-br { bottom: 80px; right: 8px; }
-}
-
-/* ===================================================
-   PORTRAIT MOBILE — max-width 500px
-   =================================================== */
-
-@media (max-width: 500px) and (orientation: portrait) {
-
-  .menu-ui {
-    padding: 1rem 1rem 0.8rem;
-    justify-content: flex-start;
-    padding-top: max(2rem, env(safe-area-inset-top, 1.5rem));
-  }
-
-  .menu-logo-block { margin-bottom: 0.75rem; }
-
-  .mlb-tag {
-    font-size: 0.5rem;
-    letter-spacing: 0.2em;
-  }
-
-  .mlb-title-jp {
-    font-size: clamp(0.85rem, 4.5vw, 1.2rem);
-    letter-spacing: 0.15em;
-  }
-
-  .mlb-title {
-    font-size: clamp(1.6rem, 10vw, 2.6rem);
-    line-height: 0.95;
-  }
-
-  .menu-nav {
-    gap: 0.38rem;
-    max-width: 100%;
-    width: 100%;
-    margin-bottom: 0.9rem;
-  }
-
-  .mnav-btn {
-    font-size: clamp(0.65rem, 3.5vw, 0.82rem);
-    padding: 0.65em 1em;
-    min-height: 44px;
-  }
-
-  .mnav-play {
-    font-size: clamp(0.72rem, 3.8vw, 0.9rem) !important;
-    padding: 0.75em 1em !important;
-  }
+  /* HUD */
+  .hud-bl { bottom: 78px; left: 8px; }
+  .hud-br { bottom: 78px; right: 8px; }
 }
