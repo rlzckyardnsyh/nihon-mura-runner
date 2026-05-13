@@ -2254,7 +2254,103 @@ function closeSettings(){
 // =====================================================
 // § 30  UI EVENTS
 // =====================================================
-document.getElementById('btnPlay').addEventListener('click',()=>{SFX.ui();startGame();});
+
+// ── Platform detection ──
+const IS_IOS = /iP(hone|od|ad)/.test(navigator.userAgent) ||
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_MOBILE = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+const IS_ANDROID = /Android/i.test(navigator.userAgent);
+
+// ── Fullscreen helpers ──
+function requestFS(el) {
+  const fn = el.requestFullscreen || el.webkitRequestFullscreen ||
+             el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (fn) return fn.call(el);
+  return Promise.reject(new Error('no_fs'));
+}
+function exitFS() {
+  const fn = document.exitFullscreen || document.webkitExitFullscreen ||
+             document.mozCancelFullScreen || document.msExitFullscreen;
+  if (fn) fn.call(document);
+}
+function isFullscreen() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement ||
+            document.mozFullScreenElement || document.msFullscreenElement);
+}
+
+// ── iOS pseudo-fullscreen (maximize viewport, hide browser chrome via scroll trick) ──
+function applyIOSFullscreen() {
+  document.body.classList.add('ios-fs-mode');
+  // Scroll to top to hide Safari address bar
+  window.scrollTo(0, 1);
+  setTimeout(() => window.scrollTo(0, 1), 300);
+  const btn = document.getElementById('btnFullscreen');
+  if (btn) { btn.textContent = 'EXIT'; btn.classList.remove('ios-fs-hint'); }
+}
+function removeIOSFullscreen() {
+  document.body.classList.remove('ios-fs-mode');
+  window.scrollTo(0, 0);
+  const btn = document.getElementById('btnFullscreen');
+  if (btn) { btn.textContent = 'ENTER'; }
+}
+let iosFS = false;
+
+// ── Orientation lock + fullscreen on PLAY (mobile) ──
+async function enterGameFullscreen() {
+  if (!IS_MOBILE) return; // desktop: no action needed
+
+  const rotateHint = document.getElementById('rotateHint');
+
+  try {
+    // Step 1: request fullscreen (required before orientation lock on most browsers)
+    await requestFS(document.documentElement);
+  } catch(e) {
+    // Fullscreen failed (iOS Safari, etc.) — continue anyway
+    if (IS_IOS) { applyIOSFullscreen(); iosFS = true; }
+  }
+
+  // Step 2: try orientation lock
+  if (screen.orientation && screen.orientation.lock) {
+    try {
+      await screen.orientation.lock('landscape');
+      // Lock succeeded — hide rotate hint if visible
+      if (rotateHint) rotateHint.style.display = 'none';
+      return;
+    } catch(e) {
+      // Lock failed — check current orientation
+    }
+  }
+
+  // Step 3: fallback — check if already landscape
+  const isLandscape = window.innerWidth > window.innerHeight;
+  if (isLandscape) {
+    if (rotateHint) rotateHint.style.display = 'none';
+    return;
+  }
+
+  // Step 4: show rotate hint (user needs to rotate manually)
+  if (rotateHint) {
+    rotateHint.style.display = 'flex';
+    // Auto-hide when user rotates
+    const onOrient = () => {
+      if (window.innerWidth > window.innerHeight) {
+        rotateHint.style.display = 'none';
+        window.removeEventListener('resize', onOrient);
+      }
+    };
+    window.addEventListener('resize', onOrient);
+  }
+}
+
+// ── PLAY button ──
+document.getElementById('btnPlay').addEventListener('click', async () => {
+  SFX.ui();
+  if (IS_MOBILE) {
+    await enterGameFullscreen();
+  }
+  startGame();
+});
+
 document.getElementById('btnCharSelect').addEventListener('click',()=>{SFX.ui();openCharSelect();});
 document.getElementById('btnEnvSelect').addEventListener('click',()=>{SFX.ui();openEnvSelect();});
 document.getElementById('btnHowTo').addEventListener('click',()=>{SFX.ui();S.screen='howto';showScreen('howToPlay');if(!aCtx)initAudio();});
@@ -2290,10 +2386,55 @@ document.querySelectorAll('.seg-b[data-particles]').forEach(b=>{
   if(b.dataset.particles===Settings.particles)b.classList.add('seg-on');else b.classList.remove('seg-on');
   b.addEventListener('click',()=>{document.querySelectorAll('.seg-b[data-particles]').forEach(x=>x.classList.remove('seg-on'));b.classList.add('seg-on');Settings.particles=b.dataset.particles;SFX.ui();});
 });
-document.getElementById('btnFullscreen')?.addEventListener('click',()=>{
-  if(!document.fullscreenElement){document.documentElement.requestFullscreen().catch(()=>{});document.getElementById('btnFullscreen').textContent='EXIT';}
-  else{document.exitFullscreen();document.getElementById('btnFullscreen').textContent='ENTER';}
-});
+// ── Fullscreen button in Settings (iOS-aware) ──
+(function setupFullscreenBtn() {
+  const btn = document.getElementById('btnFullscreen');
+  if (!btn) return;
+
+  // On iOS Safari: native fullscreen API is blocked.
+  // Show a helpful tooltip-style state instead of a broken button.
+  if (IS_IOS) {
+    btn.textContent = 'PWA MODE';
+    btn.title = 'Add to Home Screen for full-screen experience';
+    btn.classList.add('ios-fs-hint');
+    btn.addEventListener('click', () => {
+      SFX.ui();
+      if (!iosFS) {
+        applyIOSFullscreen();
+        iosFS = true;
+        btn.textContent = 'EXIT';
+        btn.classList.remove('ios-fs-hint');
+      } else {
+        removeIOSFullscreen();
+        iosFS = false;
+        btn.textContent = 'PWA MODE';
+        btn.classList.add('ios-fs-hint');
+      }
+    });
+    return;
+  }
+
+  // Android / Desktop: native fullscreen API
+  btn.addEventListener('click', () => {
+    SFX.ui();
+    if (!isFullscreen()) {
+      requestFS(document.documentElement)
+        .then(() => { btn.textContent = 'EXIT'; })
+        .catch(() => { btn.textContent = 'N/A'; });
+    } else {
+      exitFS();
+      btn.textContent = 'ENTER';
+    }
+  });
+
+  // Sync button text when user exits fullscreen via keyboard (Esc)
+  document.addEventListener('fullscreenchange', () => {
+    if (!isFullscreen()) btn.textContent = 'ENTER';
+  });
+  document.addEventListener('webkitfullscreenchange', () => {
+    if (!isFullscreen()) btn.textContent = 'ENTER';
+  });
+})();
 
 // Mobile
 function mbtn(id,dn,up){
@@ -2347,10 +2488,19 @@ canvas.addEventListener('touchend',e=>{
   }
 },{passive:true});
 
-function tryLandscape(){
-  // Portrait mode is fully supported — no landscape lock needed
-}
-document.addEventListener('touchstart',()=>{ tryLandscape(); },{once:true,passive:true});
+// ── Rotate hint dismiss button ──
+document.getElementById('btnRotateDismiss')?.addEventListener('click', () => {
+  const rh = document.getElementById('rotateHint');
+  if (rh) rh.style.display = 'none';
+});
+
+// ── Auto-hide rotate hint if device is rotated to landscape later ──
+window.addEventListener('resize', () => {
+  const rh = document.getElementById('rotateHint');
+  if (rh && rh.style.display !== 'none' && window.innerWidth > window.innerHeight) {
+    rh.style.display = 'none';
+  }
+});
 document.addEventListener('contextmenu',e=>e.preventDefault());
 
 // Fix: Page Visibility API — pause otomatis saat tab tidak aktif

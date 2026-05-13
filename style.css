@@ -915,14 +915,14 @@ canvas#gameCanvas{
   font-family:var(--font-jp); font-size:0.65rem; color:var(--c-sakura);
   opacity:0.6; letter-spacing:0.2em; margin-bottom:1.5rem;
 }
-.pause-actions{ display:flex; flex-direction:column; gap:0.6rem; }
+.pause-actions{ display:flex; flex-direction:column; gap:0.6rem; width:100%; }
 .pause-btn{
   font-family:var(--font-game); font-weight:700; font-size:0.82rem;
   letter-spacing:0.12em; padding:0.8em 1.5em;
   background:rgba(255,255,255,0.07); border:1px solid var(--c-border);
   color:var(--c-text); border-radius:var(--r-sm); cursor:pointer;
   display:flex; align-items:center; justify-content:center; gap:0.6em;
-  transition:all 0.18s;
+  transition:all 0.18s; width:100%;
 }
 .pause-btn svg{ stroke:currentColor; fill:none; flex-shrink:0; }
 .pause-btn:hover{ background:rgba(255,107,26,0.12); border-color:rgba(255,107,26,0.4); transform:translateY(-1px); }
@@ -1232,24 +1232,29 @@ canvas#gameCanvas{
   .htp-enemy-name { font-size: clamp(0.6rem, 1.5vw, 0.72rem); }
   .htp-enemy-desc { font-size: clamp(0.52rem, 1.3vw, 0.62rem); }
 
-  /* ── PAUSE MENU ── */
+  /* ── PAUSE MENU — always vertical in landscape ── */
   .pause-card {
-    width: min(420px, 82vw);
-    padding: clamp(0.7rem, 2.2vh, 1.3rem) clamp(1rem, 3vw, 1.8rem);
+    width: min(360px, 88vw);
+    max-width: 88vw;
+    padding: clamp(0.7rem, 2vh, 1.2rem) clamp(0.9rem, 3vw, 1.5rem);
+    max-height: 96vh;
+    overflow-y: auto;
   }
 
   .pause-title { font-size: clamp(1.1rem, 3.5vw, 1.7rem); }
   .pause-sub   { font-size: clamp(0.5rem, 1.3vw, 0.65rem); margin-bottom: clamp(0.5rem, 1.8vh, 1rem); }
 
   .pause-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(0.28rem, 1vh, 0.5rem);
+    display: flex !important;
+    flex-direction: column !important;
+    gap: clamp(0.3rem, 1vh, 0.5rem);
+    width: 100%;
   }
 
-  .pause-btn-primary { grid-column: 1 / -1; }
-
+  .pause-btn-primary,
   .pause-btn {
+    width: 100% !important;
+    grid-column: unset !important;
     font-size: clamp(0.6rem, 1.7vw, 0.82rem);
     padding: clamp(0.42em, 1.3vh, 0.7em) 0.9em;
     min-height: clamp(32px, 6.5vh, 44px);
@@ -1277,7 +1282,7 @@ canvas#gameCanvas{
 
 /* ======= PORTRAIT MOBILE ======= */
 @media (max-width: 600px) and (orientation: portrait) {
-  /* Pause menu — center vertically */
+  /* Pause menu — center vertically, always single column */
   .pause-backdrop {
     align-items: center;
     justify-content: center;
@@ -1293,13 +1298,13 @@ canvas#gameCanvas{
   .pause-title { font-size: clamp(1.3rem, 7vw, 1.8rem); }
   .pause-sub   { font-size: 0.62rem; margin-bottom: 1.2rem; }
   .pause-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 0.5rem;
+    width: 100%;
   }
-  .pause-btn-primary { grid-column: 1 / -1; }
-  .pause-btn-danger  { grid-column: 1 / -1; }
   .pause-btn {
+    width: 100% !important;
     font-size: 0.72rem;
     padding: 0.7em 0.8em;
     min-height: 44px;
@@ -1315,4 +1320,141 @@ canvas#gameCanvas{
   /* HUD bottom above mobile buttons */
   .hud-bl { bottom: 112px; }
   .hud-br { bottom: 112px; }
+}
+/* =================================================================
+   MOBILE LANDSCAPE — COMPREHENSIVE POPUP RESPONSIVE FIX
+   Covers ALL popups: Pause, Settings, GameOver, CharSelect,
+   EnvSelect, HowToPlay, and any modal overlay
+   Target: phones in landscape (max-height ~440px typical)
+   ================================================================= */
+
+/* ── Extra-small landscape (very short viewport, e.g. older phones) ── */
+@media (max-height: 440px) and (orientation: landscape) {
+
+  /* Pause card — compact vertical layout */
+  .pause-backdrop {
+    padding: 0.4rem;
+    align-items: center;
+    justify-content: center;
+  }
+  .pause-card {
+    width: min(320px, 85vw) !important;
+    max-width: 85vw !important;
+    padding: 0.7rem 1rem !important;
+    max-height: 98vh !important;
+    overflow-y: auto !important;
+  }
+  .pause-logo { display: none; }
+  .pause-title { font-size: clamp(0.9rem, 3vw, 1.3rem); margin-bottom: 0; }
+  .pause-sub   { font-size: 0.5rem; margin-bottom: 0.5rem; }
+  .pause-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.3rem !important;
+    width: 100% !important;
+  }
+  .pause-btn {
+    width: 100% !important;
+    min-height: 36px !important;
+    font-size: 0.62rem !important;
+    padding: 0.4em 0.8em !important;
+  }
+
+  /* Modal (Settings, GameOver) */
+  .modal-backdrop { padding: 0.4rem; }
+  .modal-box {
+    max-height: 96vh;
+    padding: 0.7rem 0.85rem;
+    overflow-y: auto;
+  }
+  .modal-title { font-size: 0.9rem; padding-right: 2rem; }
+  .modal-sub   { font-size: 0.5rem; margin-bottom: 0.55rem; }
+  .settings-body { gap: 0.3rem; }
+  .set-card {
+    padding: 0.35rem 0.55rem;
+    gap: 0.4rem;
+  }
+  .set-label { font-size: 0.5rem; }
+  .seg-b     { font-size: 0.44rem; padding: 0.18em 0.4em; }
+  .pill-btn  { font-size: 0.5rem; padding: 0.28em 0.65em; }
+
+  /* Game Over box */
+  .go-box {
+    max-width: min(360px, 92vw) !important;
+    padding: 0.65rem 0.85rem !important;
+  }
+  .go-title { font-size: 1rem; }
+  .go-sub   { font-size: 0.5rem; margin-bottom: 0.5rem; }
+  .go-stat  { padding: 0.3rem 0.2rem; font-size: 0.68rem; }
+  .go-val   { font-size: 0.78rem; }
+  .go-btns  { gap: 0.4rem; }
+
+  /* HTP — How To Play */
+  .htp-overlay { padding: 0.4rem; }
+  .htp-panel {
+    width: 96vw;
+    max-height: 96vh;
+    border-radius: 12px;
+  }
+  .htp-header {
+    padding: 0.5rem 0.85rem 0.4rem;
+    gap: 0.5rem;
+  }
+  .htp-header-icon { font-size: 1.3rem; }
+  .htp-title-text  { font-size: 0.85rem; }
+  .htp-scroll { padding: 0.55rem 0.7rem 0.9rem; }
+  .htp-close-btn {
+    top: 8px; right: 8px;
+    width: 30px; height: 30px;
+  }
+
+  /* Char select */
+  .char-select-ui {
+    width: 96vw;
+    max-height: 96vh;
+  }
+  .cs-layout {
+    grid-template-columns: clamp(100px, 18vw, 145px) 1fr !important;
+    padding: 0.4rem 0.6rem 0 !important;
+  }
+  .char-preview-canvas {
+    width: clamp(80px, 16vw, 130px) !important;
+    height: clamp(100px, 20vw, 165px) !important;
+  }
+
+  /* Env select */
+  .env-select-ui {
+    padding: 0.4rem 0.7rem !important;
+    gap: 0.4rem !important;
+  }
+  .env-card { flex: 0 0 clamp(95px, 15vw, 130px) !important; }
+  .ec-thumb { height: clamp(50px, 9vh, 75px) !important; }
+
+  /* Close X always visible and touchable */
+  .close-x {
+    width: 30px !important;
+    height: 30px !important;
+    top: 0.4rem !important;
+    right: 0.4rem !important;
+  }
+}
+
+/* ── iOS fullscreen simulation ── */
+.ios-fs-mode {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+/* ── Fullscreen button iOS state ── */
+.pill-btn.ios-fs-hint {
+  border-color: rgba(0,212,255,0.45);
+  color: var(--c-cyan);
+  animation: ios-hint-pulse 2s ease-in-out infinite alternate;
+}
+@keyframes ios-hint-pulse {
+  0%  { box-shadow: 0 0 0 rgba(0,212,255,0); }
+  100%{ box-shadow: 0 0 12px rgba(0,212,255,0.4); }
 }
