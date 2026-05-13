@@ -36,8 +36,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 
   <style>
-    /* rotateHint is shown only by JS after fullscreen+lock attempt fails */
-    #rotateHint { display:none; }
+    /* Rotate hint is controlled entirely by JS — hidden by default */
+    #rotateHint { display: none; }
   </style>
 
   <link rel="stylesheet" href="style.css"/>
@@ -440,10 +440,13 @@
 </div>
 
 <!-- ===== ROTATE HINT ===== -->
-<div id="rotateHint" style="display:none;position:fixed;inset:0;z-index:999;background:#04010a;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;">
-  <div style="font-size:3rem;animation:rotate-phone 1.5s ease-in-out infinite alternate;">📱</div>
-  <div style="font-family:'Orbitron',sans-serif;font-size:0.85rem;color:#f5c842;letter-spacing:0.2em;text-align:center;">ROTATE DEVICE<br><span style="font-size:0.6rem;color:rgba(240,232,216,0.5);letter-spacing:0.1em;">LANDSCAPE MODE REQUIRED</span></div>
-  <button id="btnRotateDismiss" style="margin-top:0.5rem;font-family:'Orbitron',sans-serif;font-size:0.6rem;letter-spacing:0.15em;padding:0.55em 1.4em;background:rgba(255,107,26,0.18);border:1px solid rgba(255,107,26,0.45);color:#ff9a40;border-radius:50px;cursor:pointer;touch-action:manipulation;">PLAY ANYWAY</button>
+<div id="rotateHint" style="display:none;position:fixed;inset:0;z-index:9999;background:#04010a;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;">
+  <div style="font-size:3.5rem;animation:rotate-phone 1.5s ease-in-out infinite alternate;">📱</div>
+  <div style="font-family:'Orbitron',sans-serif;font-size:0.9rem;color:#f5c842;letter-spacing:0.2em;text-align:center;line-height:1.8;">
+    ROTATE DEVICE
+    <div style="font-size:0.58rem;color:rgba(240,232,216,0.5);letter-spacing:0.12em;margin-top:4px;">LANDSCAPE MODE REQUIRED</div>
+  </div>
+  <div style="width:48px;height:2px;background:linear-gradient(90deg,transparent,#ff6b1a,transparent);border-radius:2px;"></div>
   <style>@keyframes rotate-phone{0%{transform:rotate(0deg)}100%{transform:rotate(90deg)}}</style>
 </div>
 

@@ -2254,103 +2254,7 @@ function closeSettings(){
 // =====================================================
 // § 30  UI EVENTS
 // =====================================================
-
-// ── Platform detection ──
-const IS_IOS = /iP(hone|od|ad)/.test(navigator.userAgent) ||
-               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const IS_MOBILE = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-const IS_ANDROID = /Android/i.test(navigator.userAgent);
-
-// ── Fullscreen helpers ──
-function requestFS(el) {
-  const fn = el.requestFullscreen || el.webkitRequestFullscreen ||
-             el.mozRequestFullScreen || el.msRequestFullscreen;
-  if (fn) return fn.call(el);
-  return Promise.reject(new Error('no_fs'));
-}
-function exitFS() {
-  const fn = document.exitFullscreen || document.webkitExitFullscreen ||
-             document.mozCancelFullScreen || document.msExitFullscreen;
-  if (fn) fn.call(document);
-}
-function isFullscreen() {
-  return !!(document.fullscreenElement || document.webkitFullscreenElement ||
-            document.mozFullScreenElement || document.msFullscreenElement);
-}
-
-// ── iOS pseudo-fullscreen (maximize viewport, hide browser chrome via scroll trick) ──
-function applyIOSFullscreen() {
-  document.body.classList.add('ios-fs-mode');
-  // Scroll to top to hide Safari address bar
-  window.scrollTo(0, 1);
-  setTimeout(() => window.scrollTo(0, 1), 300);
-  const btn = document.getElementById('btnFullscreen');
-  if (btn) { btn.textContent = 'EXIT'; btn.classList.remove('ios-fs-hint'); }
-}
-function removeIOSFullscreen() {
-  document.body.classList.remove('ios-fs-mode');
-  window.scrollTo(0, 0);
-  const btn = document.getElementById('btnFullscreen');
-  if (btn) { btn.textContent = 'ENTER'; }
-}
-let iosFS = false;
-
-// ── Orientation lock + fullscreen on PLAY (mobile) ──
-async function enterGameFullscreen() {
-  if (!IS_MOBILE) return; // desktop: no action needed
-
-  const rotateHint = document.getElementById('rotateHint');
-
-  try {
-    // Step 1: request fullscreen (required before orientation lock on most browsers)
-    await requestFS(document.documentElement);
-  } catch(e) {
-    // Fullscreen failed (iOS Safari, etc.) — continue anyway
-    if (IS_IOS) { applyIOSFullscreen(); iosFS = true; }
-  }
-
-  // Step 2: try orientation lock
-  if (screen.orientation && screen.orientation.lock) {
-    try {
-      await screen.orientation.lock('landscape');
-      // Lock succeeded — hide rotate hint if visible
-      if (rotateHint) rotateHint.style.display = 'none';
-      return;
-    } catch(e) {
-      // Lock failed — check current orientation
-    }
-  }
-
-  // Step 3: fallback — check if already landscape
-  const isLandscape = window.innerWidth > window.innerHeight;
-  if (isLandscape) {
-    if (rotateHint) rotateHint.style.display = 'none';
-    return;
-  }
-
-  // Step 4: show rotate hint (user needs to rotate manually)
-  if (rotateHint) {
-    rotateHint.style.display = 'flex';
-    // Auto-hide when user rotates
-    const onOrient = () => {
-      if (window.innerWidth > window.innerHeight) {
-        rotateHint.style.display = 'none';
-        window.removeEventListener('resize', onOrient);
-      }
-    };
-    window.addEventListener('resize', onOrient);
-  }
-}
-
-// ── PLAY button ──
-document.getElementById('btnPlay').addEventListener('click', async () => {
-  SFX.ui();
-  if (IS_MOBILE) {
-    await enterGameFullscreen();
-  }
-  startGame();
-});
-
+document.getElementById('btnPlay').addEventListener('click',()=>{SFX.ui();startGame();});
 document.getElementById('btnCharSelect').addEventListener('click',()=>{SFX.ui();openCharSelect();});
 document.getElementById('btnEnvSelect').addEventListener('click',()=>{SFX.ui();openEnvSelect();});
 document.getElementById('btnHowTo').addEventListener('click',()=>{SFX.ui();S.screen='howto';showScreen('howToPlay');if(!aCtx)initAudio();});
@@ -2386,55 +2290,17 @@ document.querySelectorAll('.seg-b[data-particles]').forEach(b=>{
   if(b.dataset.particles===Settings.particles)b.classList.add('seg-on');else b.classList.remove('seg-on');
   b.addEventListener('click',()=>{document.querySelectorAll('.seg-b[data-particles]').forEach(x=>x.classList.remove('seg-on'));b.classList.add('seg-on');Settings.particles=b.dataset.particles;SFX.ui();});
 });
-// ── Fullscreen button in Settings (iOS-aware) ──
-(function setupFullscreenBtn() {
-  const btn = document.getElementById('btnFullscreen');
-  if (!btn) return;
-
-  // On iOS Safari: native fullscreen API is blocked.
-  // Show a helpful tooltip-style state instead of a broken button.
-  if (IS_IOS) {
-    btn.textContent = 'PWA MODE';
-    btn.title = 'Add to Home Screen for full-screen experience';
-    btn.classList.add('ios-fs-hint');
-    btn.addEventListener('click', () => {
-      SFX.ui();
-      if (!iosFS) {
-        applyIOSFullscreen();
-        iosFS = true;
-        btn.textContent = 'EXIT';
-        btn.classList.remove('ios-fs-hint');
-      } else {
-        removeIOSFullscreen();
-        iosFS = false;
-        btn.textContent = 'PWA MODE';
-        btn.classList.add('ios-fs-hint');
-      }
-    });
-    return;
+document.getElementById('btnFullscreen')?.addEventListener('click',()=>{
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().then(()=>{document.getElementById('btnFullscreen').textContent='EXIT';}).catch(()=>{});
+  } else {
+    document.exitFullscreen().catch(()=>{});
+    document.getElementById('btnFullscreen').textContent='ENTER';
   }
-
-  // Android / Desktop: native fullscreen API
-  btn.addEventListener('click', () => {
-    SFX.ui();
-    if (!isFullscreen()) {
-      requestFS(document.documentElement)
-        .then(() => { btn.textContent = 'EXIT'; })
-        .catch(() => { btn.textContent = 'N/A'; });
-    } else {
-      exitFS();
-      btn.textContent = 'ENTER';
-    }
-  });
-
-  // Sync button text when user exits fullscreen via keyboard (Esc)
-  document.addEventListener('fullscreenchange', () => {
-    if (!isFullscreen()) btn.textContent = 'ENTER';
-  });
-  document.addEventListener('webkitfullscreenchange', () => {
-    if (!isFullscreen()) btn.textContent = 'ENTER';
-  });
-})();
+  document.addEventListener('fullscreenchange',()=>{
+    if(!document.fullscreenElement){const b=document.getElementById('btnFullscreen');if(b)b.textContent='ENTER';}
+  },{once:true});
+});
 
 // Mobile
 function mbtn(id,dn,up){
@@ -2488,18 +2354,40 @@ canvas.addEventListener('touchend',e=>{
   }
 },{passive:true});
 
-// ── Rotate hint dismiss button ──
-document.getElementById('btnRotateDismiss')?.addEventListener('click', () => {
-  const rh = document.getElementById('rotateHint');
-  if (rh) rh.style.display = 'none';
-});
+// =====================================================
+// § 30b  MOBILE ORIENTATION GATE
+// =====================================================
+// On mobile: if portrait → show rotate hint and BLOCK everything.
+// When user rotates to landscape → auto-hide hint and resume.
+// On desktop: no-op.
 
-// ── Auto-hide rotate hint if device is rotated to landscape later ──
-window.addEventListener('resize', () => {
-  const rh = document.getElementById('rotateHint');
-  if (rh && rh.style.display !== 'none' && window.innerWidth > window.innerHeight) {
-    rh.style.display = 'none';
+const _IS_MOBILE_GATE = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+let _gateOpen = true; // true = OK to run, false = waiting for landscape
+
+function _checkOrientation() {
+  if (!_IS_MOBILE_GATE) return; // desktop: always open
+  const isLandscape = window.innerWidth > window.innerHeight;
+  const hint = document.getElementById('rotateHint');
+  if (!isLandscape) {
+    // Portrait on mobile — block
+    _gateOpen = false;
+    if (hint) hint.style.display = 'flex';
+  } else {
+    // Landscape — open gate, hide hint
+    const wasBlocked = !_gateOpen;
+    _gateOpen = true;
+    if (hint) hint.style.display = 'none';
+    // If loading was already done but game was blocked, show main menu now
+    if (wasBlocked && _loadingDone) {
+      _afterLoadReady();
+    }
   }
+}
+
+window.addEventListener('resize', _checkOrientation);
+// Also listen to orientationchange for faster response
+window.addEventListener('orientationchange', () => {
+  setTimeout(_checkOrientation, 120); // small delay for browser to update dimensions
 });
 document.addEventListener('contextmenu',e=>e.preventDefault());
 
@@ -2512,6 +2400,25 @@ document.addEventListener('visibilitychange',()=>{
 // § 31  LOADING
 // =====================================================
 const TIPS=['🏃 EASY is fun & responsive — not slow!','⚔️ Build COMBO by collecting coins rapidly','💨 DASH through obstacles safely','🎋 SLIDE under bamboo gates','🎯 Aim with mouse + CLICK to shoot','🧧 TALISMAN blocks one incoming hit','🦅 Tengu enemies shoot — keep moving!','👹 Oni hits hard — shoot from range','🥷 Ninja enemies are fast — react quick!','🌸 SAKURA = +600 bonus score','🍜 RAMEN grants speed boost!','⬆️ Jump to platforms for bonus coins'];
+
+let _loadingDone = false;
+
+// Called when loading animation finishes AND orientation is landscape
+function _afterLoadReady() {
+  if (!_gateOpen) return; // still portrait — will be called again when rotated
+  const ls = document.getElementById('loadingScreen');
+  ls.style.opacity = '0'; ls.style.transition = 'opacity 0.8s ease';
+  setTimeout(() => {
+    ls.classList.add('hidden');
+    S.hs = parseInt(localStorage.getItem('nmr_hs') || localStorage.getItem('ntr_hs') || '0');
+    document.getElementById('menuHighScore').textContent = String(Math.floor(S.hs)).padStart(6, '0');
+    resizeCanvas(); genBG(); S.screen = 'menu'; showScreen('mainMenu');
+    initMenuBG(); startMenuBGLoop();
+    const sa = () => { if (!aCtx) initAudio(); document.removeEventListener('click', sa); document.removeEventListener('touchstart', sa); document.removeEventListener('keydown', sa); };
+    document.addEventListener('click', sa, {once:true}); document.addEventListener('touchstart', sa, {once:true}); document.addEventListener('keydown', sa, {once:true});
+  }, 800);
+}
+
 function runLoading(){
   const bar=document.getElementById('loadBar'),status=document.getElementById('loadStatus'),pct=document.getElementById('loadPct'),tips=document.getElementById('loadTips');
   tips.textContent=TIPS[Math.floor(Math.random()*TIPS.length)];
@@ -2520,16 +2427,8 @@ function runLoading(){
   function next(){
     if(i>=steps.length){
       setTimeout(()=>{
-        const ls=document.getElementById('loadingScreen');ls.style.opacity='0';ls.style.transition='opacity 0.8s ease';
-        setTimeout(()=>{
-          ls.classList.add('hidden');
-          S.hs=parseInt(localStorage.getItem('nmr_hs')||localStorage.getItem('ntr_hs')||'0');
-          document.getElementById('menuHighScore').textContent=String(Math.floor(S.hs)).padStart(6,'0');
-          resizeCanvas();genBG();S.screen='menu';showScreen('mainMenu');
-          initMenuBG();startMenuBGLoop();
-          const sa=()=>{if(!aCtx)initAudio();document.removeEventListener('click',sa);document.removeEventListener('touchstart',sa);document.removeEventListener('keydown',sa);};
-          document.addEventListener('click',sa,{once:true});document.addEventListener('touchstart',sa,{once:true});document.addEventListener('keydown',sa,{once:true});
-        },800);
+        _loadingDone = true;
+        _afterLoadReady(); // will respect _gateOpen
       },500);return;
     }
     const[p,msg]=steps[i];bar.style.width=p+'%';status.textContent=msg;pct.textContent=p+'%';
@@ -2538,4 +2437,8 @@ function runLoading(){
   }
   next();
 }
-window.addEventListener('load',()=>{resizeCanvas();runLoading();});
+window.addEventListener('load', () => {
+  resizeCanvas();
+  _checkOrientation(); // check immediately on load
+  runLoading();
+});
