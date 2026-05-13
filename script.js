@@ -2334,7 +2334,14 @@ canvas.addEventListener('touchend',e=>{
   if(Math.abs(dx)<10&&Math.abs(dy)<10) return;
   if(Math.abs(dy)>Math.abs(dx)*0.7){
     if(dy<-28){K.jump=1;} // swipe up = jump
-    else if(dy>28){K.slide=1;} // swipe down = slide
+    else if(dy>28){
+      // swipe down: if airborne → fast fall; else → slide
+      if(!Player.onGround && Player.vy!==undefined){
+        Player.vy=Math.max(Player.vy, 18); // fast fall — override gravity for instant drop
+      } else {
+        K.slide=1; // on ground → slide
+      }
+    }
   } else {
     if(dx>30){K.dash=1;} // swipe right = dash
   }

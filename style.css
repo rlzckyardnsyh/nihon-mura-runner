@@ -859,39 +859,24 @@ canvas#gameCanvas{
 #mobileControls{
   position:fixed; bottom:0; left:0; right:0;
   display:flex; justify-content:space-between; align-items:flex-end;
-  padding:8px 16px 14px; z-index:25; pointer-events:none;
+  padding:8px 20px 18px; z-index:25; pointer-events:none;
 }
 .mc-left,.mc-right{
   display:flex; gap:10px; align-items:flex-end; pointer-events:all;
 }
-/* Swipe hint zone on left */
-.mc-swipe-hint {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  width:70px; height:70px; border-radius:12px;
-  background:rgba(0,0,0,0.38); border:1.5px solid rgba(255,180,80,0.2);
-  backdrop-filter:blur(6px); gap:2px; pointer-events:none;
-}
-.mc-swipe-arrow {
-  font-size:1rem; opacity:0.5; line-height:1;
-}
-.mc-swipe-up { animation: mc-bounce-up 1.4s ease-in-out infinite; color:var(--c-orange); }
-.mc-swipe-down { animation: mc-bounce-down 1.4s ease-in-out infinite 0.2s; color:var(--c-purple); }
-@keyframes mc-bounce-up { 0%,100%{transform:translateY(0);opacity:0.4} 50%{transform:translateY(-3px);opacity:0.8} }
-@keyframes mc-bounce-down { 0%,100%{transform:translateY(0);opacity:0.4} 50%{transform:translateY(3px);opacity:0.8} }
-.mc-swipe-label { font-family:var(--font-game); font-size:0.38rem; letter-spacing:0.12em; opacity:0.4; color:var(--c-text); }
 
 .mc-btn{
-  width:64px; height:64px; border-radius:14px;
+  width:78px; height:78px; border-radius:16px;
   background:rgba(0,0,0,0.62); border:1.5px solid rgba(255,180,80,0.28);
   color:var(--c-text); cursor:pointer; backdrop-filter:blur(6px);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
   touch-action:manipulation; transition:all 0.1s;
 }
-.mc-btn-label { font-family:var(--font-game); font-size:0.38rem; letter-spacing:0.1em; opacity:0.7; }
+.mc-btn-label { font-family:var(--font-game); font-size:0.42rem; letter-spacing:0.1em; opacity:0.7; }
 .mc-btn svg{ stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .mc-btn:active{ background:rgba(255,107,26,0.38); transform:scale(0.91); }
 .mc-shoot{
-  width:72px; height:72px; border-radius:50%;
+  width:86px; height:86px; border-radius:50%;
   background:rgba(0,212,255,0.18); border:2px solid var(--c-cyan);
   box-shadow:0 0 20px rgba(0,212,255,0.3);
 }
@@ -900,9 +885,8 @@ canvas#gameCanvas{
 
 /* Landscape compact */
 @media(max-height:440px) and (orientation:landscape){
-  .mc-btn{ width:52px; height:52px; }
-  .mc-shoot{ width:58px; height:58px; }
-  .mc-swipe-hint{ width:56px; height:56px; }
+  .mc-btn{ width:58px; height:58px; }
+  .mc-shoot{ width:66px; height:66px; }
 }
 
 /* ======= PAUSE ======= */
@@ -910,14 +894,16 @@ canvas#gameCanvas{
   position:fixed; inset:0; z-index:50;
   background:rgba(4,1,10,0.72); backdrop-filter:blur(18px);
   display:flex; align-items:center; justify-content:center;
+  padding:1rem;
   animation:modal-in 0.2s ease;
 }
 .pause-card{
   background:var(--c-panel);
   border:1px solid var(--c-border); border-radius:var(--r-xl);
-  padding:2rem 2rem; width:min(320px,92vw);
+  padding:2rem 2rem; width:min(340px,92vw);
   box-shadow:0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(255,107,26,0.06);
   text-align:center;
+  margin:auto;
 }
 .pause-logo{ margin-bottom:0.5rem; }
 .pause-title{
@@ -1287,4 +1273,46 @@ canvas#gameCanvas{
     font-size: clamp(0.58rem, 1.5vw, 0.72rem);
     min-height: clamp(32px, 6vh, 40px);
   }
+}
+
+/* ======= PORTRAIT MOBILE ======= */
+@media (max-width: 600px) and (orientation: portrait) {
+  /* Pause menu — center vertically */
+  .pause-backdrop {
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+  }
+  .pause-card {
+    width: min(340px, 90vw);
+    padding: 1.6rem 1.4rem;
+    margin: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .pause-title { font-size: clamp(1.3rem, 7vw, 1.8rem); }
+  .pause-sub   { font-size: 0.62rem; margin-bottom: 1.2rem; }
+  .pause-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .pause-btn-primary { grid-column: 1 / -1; }
+  .pause-btn-danger  { grid-column: 1 / -1; }
+  .pause-btn {
+    font-size: 0.72rem;
+    padding: 0.7em 0.8em;
+    min-height: 44px;
+  }
+
+  /* Mobile controls — bottom safe */
+  #mobileControls {
+    padding: 8px 20px calc(env(safe-area-inset-bottom, 8px) + 14px);
+  }
+  .mc-btn  { width: 80px; height: 80px; }
+  .mc-shoot{ width: 88px; height: 88px; }
+
+  /* HUD bottom above mobile buttons */
+  .hud-bl { bottom: 112px; }
+  .hud-br { bottom: 112px; }
 }
