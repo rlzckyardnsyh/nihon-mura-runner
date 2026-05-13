@@ -1757,3 +1757,840 @@ body.modal-open {
   ::-webkit-scrollbar { width: 2px; }
   ::-webkit-scrollbar-thumb { background: rgba(255,107,26,0.4); }
 }
+/* =================================================================
+   LANDSCAPE MOBILE RESPONSIVE OVERHAUL
+   Target: Android/iPhone landscape, max-height ~430px (phone landscape)
+   Breakpoints: max-height:500px landscape, max-height:430px landscape
+   ================================================================= */
+
+/* ── MAIN MENU — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .menu-ui {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 0.5rem 2rem;
+  }
+
+  .menu-logo-block {
+    margin-bottom: 0;
+    text-align: center;
+    flex-shrink: 0;
+    width: 220px;
+  }
+
+  .mlb-tag {
+    font-size: 0.42rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.1rem;
+  }
+
+  .mlb-title-jp {
+    font-size: clamp(0.65rem, 2vh, 0.9rem);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.05rem;
+  }
+
+  .mlb-title {
+    font-size: clamp(1.3rem, 7vh, 2.2rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+  }
+
+  .mlb-line {
+    width: 40px;
+    margin: 0.3rem auto 0;
+  }
+
+  .menu-nav {
+    gap: 0.28rem;
+    max-width: 220px;
+    margin-bottom: 0.4rem;
+    flex: 1;
+  }
+
+  .mnav-btn {
+    font-size: clamp(0.55rem, 2vh, 0.72rem);
+    padding: 0.45em 0.9em;
+    letter-spacing: 0.06em;
+    border-radius: 7px;
+    min-height: 36px;
+  }
+
+  .mnav-play {
+    font-size: clamp(0.6rem, 2.2vh, 0.78rem) !important;
+    padding: 0.5em 0.9em !important;
+    min-height: 38px;
+  }
+
+  .micon {
+    width: 13px;
+    height: 13px;
+  }
+
+  .menu-bottom {
+    display: none;
+  }
+}
+
+@media (max-height: 380px) and (orientation: landscape) {
+  .mlb-title {
+    font-size: clamp(1rem, 6vh, 1.6rem);
+  }
+
+  .mnav-btn {
+    font-size: 0.52rem;
+    padding: 0.38em 0.75em;
+    min-height: 32px;
+  }
+
+  .menu-nav {
+    gap: 0.22rem;
+  }
+}
+
+/* ── CHARACTER SELECT — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .char-select-ui {
+    width: min(96vw, 700px);
+    max-height: 96vh;
+    border-radius: var(--r-lg);
+  }
+
+  .cs-header {
+    padding: 0.45rem 3rem 0.35rem;
+  }
+
+  .cs-title {
+    font-size: clamp(0.55rem, 2vh, 0.75rem);
+    letter-spacing: 0.2em;
+  }
+
+  .cs-sub {
+    font-size: 0.48rem;
+    margin-top: 1px;
+  }
+
+  .cs-layout {
+    grid-template-columns: 160px 1fr;
+    padding: 0.6rem 1rem 0;
+    gap: 0;
+  }
+
+  .cs-preview-col {
+    padding-right: 0.8rem;
+    gap: 0.4rem;
+  }
+
+  .cs-spotlight {
+    display: none;
+  }
+
+  .char-preview-canvas {
+    width: clamp(100px, 18vh, 140px);
+    height: clamp(120px, 22vh, 170px);
+  }
+
+  .cs-carousel-nav {
+    gap: 0.4rem;
+  }
+
+  .cs-nav-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .cs-nav-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .cs-dots {
+    gap: 4px;
+  }
+
+  .cs-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .cs-dot.active {
+    width: 14px;
+  }
+
+  .cs-info-col {
+    padding-left: 0.8rem;
+    gap: 0;
+    overflow-y: auto;
+    max-height: calc(96vh - 120px);
+  }
+
+  .cs-rarity-badge {
+    font-size: 0.42rem;
+    padding: 0.12em 0.5em;
+    margin-bottom: 0.2rem;
+  }
+
+  .cs-char-name {
+    font-size: clamp(1rem, 5vh, 1.5rem);
+    margin-bottom: 0.08rem;
+  }
+
+  .cs-char-role {
+    font-size: 0.52rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.3rem;
+  }
+
+  .cs-divider {
+    margin-bottom: 0.3rem;
+  }
+
+  .cs-char-desc {
+    font-size: 0.6rem;
+    line-height: 1.4;
+    margin-bottom: 0.4rem;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+
+  .cs-stats-block {
+    gap: 0.22rem;
+    margin-bottom: 0.4rem;
+    padding: 0.35rem 0.55rem;
+  }
+
+  .cs-stat-label {
+    font-size: 0.42rem;
+    width: 42px;
+  }
+
+  .cs-stat-num {
+    font-size: 0.48rem;
+  }
+
+  .cs-skill-block {
+    margin-bottom: 0.3rem;
+    gap: 0.3rem;
+  }
+
+  .cs-skill-tag {
+    font-size: 0.42rem;
+    padding: 0.2em 0.45em;
+  }
+
+  .cs-skill-name {
+    font-size: 0.46rem;
+  }
+
+  .cs-skill-desc {
+    font-size: 0.38rem;
+  }
+
+  .cs-weapon-label {
+    font-size: 0.48rem;
+  }
+
+  .cs-bottom-bar {
+    padding: 0.5rem 1rem 0.7rem;
+    gap: 0.5rem;
+  }
+
+  .cs-selected-tag {
+    font-size: 0.45rem;
+  }
+
+  .confirm-btn {
+    font-size: 0.62rem;
+    padding: 0.5em 1.1em;
+    min-height: 34px;
+  }
+
+  .close-x {
+    width: 30px;
+    height: 30px;
+    top: 0.45rem;
+    right: 0.45rem;
+  }
+
+  .close-x svg {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+/* ── ENVIRONMENT SELECT — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .env-select-ui {
+    padding: 0.5rem 1rem 0.8rem;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .es-title {
+    font-size: clamp(0.8rem, 4vh, 1.1rem);
+    letter-spacing: 0.1em;
+  }
+
+  .es-sub {
+    font-size: 0.48rem;
+    letter-spacing: 0.12em;
+  }
+
+  .env-cards-row {
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.3rem;
+    justify-content: flex-start;
+    width: 100%;
+    scrollbar-width: none;
+  }
+
+  .env-cards-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .env-card {
+    flex: 0 0 min(120px, 20vw);
+    min-width: 100px;
+  }
+
+  .ec-thumb {
+    height: 55px;
+  }
+
+  .ec-info {
+    padding: 0.25rem 0.4rem;
+    gap: 1px;
+  }
+
+  .ec-icon {
+    font-size: 0.75rem;
+  }
+
+  .ec-name {
+    font-size: 0.48rem;
+  }
+
+  .ec-jp {
+    font-size: 0.4rem;
+  }
+
+  .env-desc-panel {
+    font-size: 0.58rem;
+    padding: 0.4rem 0.7rem;
+    min-height: 1.8em;
+  }
+
+  #envSelectScreen .confirm-btn {
+    font-size: 0.62rem;
+    padding: 0.45em 1.1em;
+    min-height: 34px;
+  }
+
+  #envSelectScreen .close-x {
+    width: 30px;
+    height: 30px;
+    top: 0.45rem;
+    right: 0.45rem;
+  }
+}
+
+/* ── SETTINGS MODAL — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-backdrop {
+    padding: 0.5rem;
+  }
+
+  .modal-box {
+    max-height: 94vh;
+    padding: 0.8rem 1rem;
+    border-radius: var(--r-lg);
+  }
+
+  .modal-title {
+    font-size: clamp(0.8rem, 4vh, 1.1rem);
+    letter-spacing: 0.12em;
+    margin-bottom: 0.1rem;
+    padding-right: 2rem;
+  }
+
+  .modal-sub {
+    font-size: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .modal-close {
+    top: 0.55rem;
+    right: 0.55rem;
+  }
+
+  .modal-close .close-x {
+    width: 28px;
+    height: 28px;
+  }
+
+  .settings-body {
+    gap: 0.35rem;
+  }
+
+  .set-card {
+    padding: 0.45rem 0.6rem;
+    gap: 0.45rem;
+    border-radius: 8px;
+  }
+
+  .set-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .set-info {
+    flex: 0 0 52px;
+  }
+
+  .set-label {
+    font-size: 0.52rem;
+    letter-spacing: 0.05em;
+  }
+
+  .ntr-slider {
+    min-width: 50px;
+    height: 2px;
+  }
+
+  .set-val {
+    font-size: 0.55rem;
+    min-width: 18px;
+  }
+
+  .seg-b {
+    font-size: 0.46rem;
+    padding: 0.22em 0.45em;
+  }
+
+  .pill-btn {
+    font-size: 0.52rem;
+    padding: 0.3em 0.65em;
+    min-height: 28px;
+  }
+}
+
+/* ── HOW TO PLAY — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .htp-overlay {
+    padding: 0.4rem;
+  }
+
+  .htp-panel {
+    width: min(96vw, 680px);
+    max-height: 96vh;
+    border-radius: 14px;
+  }
+
+  .htp-close-btn {
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .htp-close-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .htp-header {
+    padding: 0.55rem 1rem 0.45rem;
+    gap: 0.5rem;
+  }
+
+  .htp-header-icon {
+    font-size: 1.2rem;
+  }
+
+  .htp-title-text {
+    font-size: clamp(0.75rem, 3.5vh, 1rem);
+    letter-spacing: 0.1em;
+  }
+
+  .htp-subtitle-text {
+    font-size: 0.44rem;
+  }
+
+  .htp-scroll {
+    padding: 0.6rem 0.8rem 0.8rem;
+  }
+
+  .htp-section {
+    margin-bottom: 0.65rem;
+  }
+
+  .htp-section-title {
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    padding-bottom: 0.3rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .htp-section-icon {
+    font-size: 0.8rem;
+  }
+
+  .htp-controls-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.3rem;
+  }
+
+  .htp-ctrl-card {
+    padding: 0.35rem 0.5rem;
+    border-radius: 7px;
+  }
+
+  .htp-ctrl-key {
+    font-size: 0.46rem;
+    margin-bottom: 2px;
+  }
+
+  .htp-ctrl-act {
+    font-size: 0.54rem;
+  }
+
+  .htp-ctrl-emoji {
+    font-size: 0.7rem;
+  }
+
+  .htp-enemies-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.4rem;
+  }
+
+  .htp-enemy-card {
+    padding: 0.5rem 0.6rem;
+    gap: 0.5rem;
+    border-radius: 8px;
+  }
+
+  .htp-enemy-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  .htp-enemy-name {
+    font-size: 0.58rem;
+  }
+
+  .htp-enemy-type-badge {
+    font-size: 0.4rem;
+    padding: 1px 4px;
+    margin: 2px 0 3px;
+  }
+
+  .htp-enemy-desc {
+    font-size: 0.52rem;
+    line-height: 1.35;
+  }
+
+  .htp-two-col {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+
+  .htp-item-row {
+    font-size: 0.54rem;
+    padding: 0.25rem 0.4rem;
+    border-radius: 6px;
+    gap: 0.4rem;
+  }
+
+  .htp-item-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
+
+  .htp-obs-row {
+    font-size: 0.54rem;
+    padding: 0.25rem 0.4rem;
+    gap: 0.4rem;
+  }
+
+  .htp-obs-tag {
+    font-size: 0.4rem;
+    padding: 1px 5px;
+  }
+
+  .htp-tips-banner {
+    padding: 0.55rem 0.7rem;
+    border-radius: 8px;
+  }
+
+  .htp-tips-title {
+    font-size: 0.52rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .htp-tip-pill {
+    font-size: 0.48rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+
+/* ── PAUSE MENU — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pause-backdrop {
+    padding: 0.5rem;
+  }
+
+  .pause-card {
+    width: min(380px, 80vw);
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--r-lg);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    text-align: left;
+  }
+
+  .pause-logo {
+    display: none;
+  }
+
+  .pause-title {
+    font-size: clamp(1rem, 5vh, 1.4rem);
+    letter-spacing: 0.1em;
+    margin-right: 0.5rem;
+  }
+
+  .pause-sub {
+    font-size: 0.5rem;
+    margin-bottom: 0;
+    align-self: center;
+    margin-top: 0.2rem;
+  }
+
+  .pause-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+  }
+
+  .pause-btn {
+    font-size: 0.6rem;
+    padding: 0.5em 0.8em;
+    letter-spacing: 0.06em;
+    border-radius: 7px;
+    min-height: 36px;
+    gap: 0.4em;
+  }
+
+  .pause-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .pause-btn-primary {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── GAME OVER — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-backdrop {
+    padding: 0.5rem;
+  }
+
+  .go-box {
+    max-width: min(420px, 90vw) !important;
+    padding: 0.8rem 1.1rem !important;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .go-icon-row {
+    display: none;
+  }
+
+  .go-title {
+    font-size: clamp(0.9rem, 4.5vh, 1.3rem);
+    letter-spacing: 0.08em;
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .go-sub {
+    font-size: 0.5rem;
+    margin-bottom: 0.4rem;
+    width: 100%;
+  }
+
+  .go-stats {
+    flex: 1;
+    margin-bottom: 0;
+    min-width: 160px;
+  }
+
+  .go-stat {
+    padding: 0.28rem 0.2rem;
+    font-size: 0.62rem;
+  }
+
+  .go-val {
+    font-size: 0.75rem;
+  }
+
+  .go-record {
+    font-size: 0.68rem;
+    margin-bottom: 0.4rem;
+    width: 100%;
+  }
+
+  .go-btns {
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 0 0 auto;
+    justify-content: center;
+    align-self: center;
+  }
+
+  .go-btns .confirm-btn {
+    font-size: 0.62rem;
+    padding: 0.5em 1em;
+    min-height: 34px;
+    justify-content: center;
+  }
+
+  .go-btns .pill-btn {
+    font-size: 0.58rem;
+    padding: 0.42em 0.9em;
+    min-height: 32px;
+    justify-content: center;
+  }
+}
+
+/* ── LOADING — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .load-ui {
+    padding: 1rem 1.5rem;
+  }
+
+  .load-logo {
+    margin-bottom: 0.8rem;
+  }
+
+  .load-logo-jp {
+    font-size: clamp(0.55rem, 2.5vh, 0.8rem);
+    letter-spacing: 0.15em;
+  }
+
+  .load-logo-en {
+    font-size: clamp(1.3rem, 7vh, 2.5rem);
+  }
+
+  .load-tips {
+    font-size: 0.58rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .load-pct {
+    font-size: 0.85rem;
+  }
+}
+
+/* ── HUD — LANDSCAPE MOBILE ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hud-tl { top: 6px; left: 6px; }
+  .hud-tc { top: 6px; }
+  .hud-tr { top: 6px; right: 6px; }
+  .hud-bl { bottom: 72px; left: 6px; }
+  .hud-br { bottom: 72px; right: 6px; }
+
+  .hud-hp-row {
+    padding: 3px 8px;
+    gap: 4px;
+    border-radius: 20px;
+  }
+
+  .hud-hp-track { width: 60px; height: 6px; }
+  .hud-hp-num { font-size: 0.48rem; min-width: 18px; }
+
+  .hud-score { font-size: clamp(0.7rem, 3vh, 1rem); }
+  .hud-combo { font-size: 0.55rem; }
+
+  .hud-pause {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hud-pause svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .hud-speed-badge {
+    padding: 3px 7px;
+    font-size: 0.52rem;
+    border-radius: 7px;
+  }
+
+  .hud-best {
+    padding: 3px 7px;
+    font-size: 0.52rem;
+    border-radius: 7px;
+  }
+}
+
+/* ── MOBILE CONTROLS — LANDSCAPE COMPACT ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  #mobileControls {
+    padding: 5px 10px 8px;
+  }
+
+  .mc-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+  }
+
+  .mc-shoot {
+    width: 58px;
+    height: 58px;
+  }
+
+  .mc-swipe-hint {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+  }
+
+  .mc-btn-label {
+    font-size: 0.32rem;
+  }
+
+  .mc-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-height: 380px) and (orientation: landscape) {
+  .mc-btn { width: 44px; height: 44px; }
+  .mc-shoot { width: 50px; height: 50px; }
+  .mc-swipe-hint { width: 44px; height: 44px; }
+  .hud-bl { bottom: 58px; }
+  .hud-br { bottom: 58px; }
+}
