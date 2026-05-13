@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+
+  <!-- === SEO & SOCIAL === -->
+  <title>日本村ランナー — NIHON MURA RUNNER</title>
+  <meta name="description" content="Nihon Mura Runner — game lari aksi bertema desa Jepang. Lompat, slide, tembak musuh, dan kumpulkan koin di berbagai lingkungan: musim semi, malam, hujan, fajar, dan cyber village!"/>
+  <meta name="keywords" content="nihon mura runner, game jepang, endless runner, game browser, rlzckyardnsyh"/>
+  <meta name="author" content="rlzckyardnsyh"/>
+  <meta name="robots" content="index, follow"/>
+
+  <!-- Open Graph (WhatsApp, Discord, Facebook) -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="日本村ランナー — NIHON MURA RUNNER"/>
+  <meta property="og:description" content="Game lari aksi bertema desa Jepang. Pilih karakter, pilih lingkungan, dan lari sejauh mungkin!"/>
+  <meta property="og:image" content="thumbnail.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="日本村ランナー — NIHON MURA RUNNER"/>
+  <meta name="twitter:description" content="Game lari aksi bertema desa Jepang. Pilih karakter, pilih lingkungan, dan lari sejauh mungkin!"/>
+  <meta name="twitter:image" content="thumbnail.png"/>
+
+  <!-- === FAVICON (emoji SVG — tidak butuh file tambahan) === -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏃</text></svg>"/>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏃</text></svg>"/>
+
+  <!-- === PWA === -->
+  <meta name="theme-color" content="#04010a"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+  <style>
+    @media screen and (orientation:portrait) and (max-width:900px) {
+      #rotateHint { display:flex !important; }
+    }
+  </style>
+
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700;900&family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div id="loadingScreen">
+  <canvas id="loadCanvas" class="full-canvas"></canvas>
+  <div class="load-ui">
+    <div class="load-logo">
+      <div class="load-logo-jp">日本村ランナー</div>
+      <div class="load-logo-en">NIHON MURA<br><span>RUNNER</span></div>
+    </div>
+    <div class="load-tips" id="loadTips">Build COMBO by collecting coins rapidly</div>
+    <div class="load-progress">
+      <div class="load-bar-track"><div class="load-bar-fill" id="loadBar"></div></div>
+      <div class="load-status" id="loadStatus">Initializing...</div>
+    </div>
+    <div class="load-pct" id="loadPct">0%</div>
+  </div>
+</div>
+
+<!-- ===== MAIN MENU ===== -->
+<div id="mainMenu" class="screen hidden">
+  <canvas id="menuCanvas" class="full-canvas"></canvas>
+  <div class="menu-ui">
+    <div class="menu-logo-block">
+      <div class="mlb-tag">▸ DESA JEPANG · 日本の村</div>
+      <div class="mlb-title-jp">日本村ランナー</div>
+      <div class="mlb-title">NIHON MURA<br>RUNNER</div>
+      <div class="mlb-line"></div>
+    </div>
+
+    <nav class="menu-nav">
+      <button class="mnav-btn mnav-play" id="btnPlay">
+        <svg class="micon" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        <span>PLAY GAME</span>
+        <div class="mnav-shine"></div>
+      </button>
+      <button class="mnav-btn" id="btnCharSelect">
+        <svg class="micon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span>CHARACTER</span>
+      </button>
+      <button class="mnav-btn" id="btnEnvSelect">
+        <svg class="micon" viewBox="0 0 24 24"><path d="M3 17l5-8 4 5 3-4 6 7H3z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="6" r="2" fill="currentColor"/></svg>
+        <span>ENVIRONMENT</span>
+      </button>
+      <button class="mnav-btn" id="btnHowTo">
+        <svg class="micon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 1 1 4 2.83V14"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+        <span>HOW TO PLAY</span>
+      </button>
+      <button class="mnav-btn" id="btnSettings">
+        <svg class="micon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <span>SETTINGS</span>
+      </button>
+    </nav>
+
+    <div class="menu-bottom">
+      <div class="menu-score-row">
+        <div class="msr-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" fill="#f5c842"/></svg>
+        </div>
+        <span class="msr-label">BEST</span>
+        <span class="msr-val" id="menuHighScore">000000</span>
+      </div>
+      <div class="menu-hint">WASD / ARROWS · SPACE=JUMP · SHIFT=DASH · CLICK=SHOOT</div>
+      <div class="menu-credit">Created by <strong>rlzckyardnsyh</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHARACTER SELECT ===== -->
+<div id="charSelectScreen" class="screen hidden">
+  <canvas id="charBgCanvas" class="full-canvas"></canvas>
+  <div class="char-select-ui">
+    <button class="close-x" id="btnCloseChar">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="cs-header">
+      <div class="cs-title">CHARACTER SELECT</div>
+      <div class="cs-sub">エージェント選択</div>
+    </div>
+    <div class="cs-layout">
+      <!-- Left: preview + carousel nav -->
+      <div class="cs-preview-col">
+        <div class="cs-spotlight"></div>
+        <canvas id="charPreviewCanvas" class="char-preview-canvas"></canvas>
+        <div class="cs-carousel-nav">
+          <button class="cs-nav-btn" id="charPrev">
+            <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
+          </button>
+          <div class="cs-dots" id="charDots"></div>
+          <button class="cs-nav-btn" id="charNext">
+            <svg viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- Right: info -->
+      <div class="cs-info-col">
+        <div class="cs-rarity-badge" id="csRarityBadge">RARE</div>
+        <div class="cs-char-name" id="csCharName">KENJI</div>
+        <div class="cs-char-role" id="csCharRole">STREET OPS</div>
+        <div class="cs-divider"></div>
+        <div class="cs-char-desc" id="csCharDesc">—</div>
+        <div class="cs-stats-block" id="csStats"></div>
+        <div class="cs-skill-block" id="csSkillBlock"></div>
+        <div class="cs-weapon-label">
+          <svg viewBox="0 0 24 24" width="13" height="13"><path d="M4 12h10M18 12h2M10 8v8" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+          WEAPON: <span id="csWeapon">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="cs-bottom-bar">
+      <div class="cs-selected-tag" id="csSelectedTag">CURRENTLY SELECTED: —</div>
+      <button class="confirm-btn" id="btnConfirmChar">
+        <svg viewBox="0 0 24 24" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
+        SELECT AGENT
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ENVIRONMENT SELECT ===== -->
+<div id="envSelectScreen" class="screen hidden">
+  <canvas id="envBgCanvas" class="full-canvas"></canvas>
+  <div class="env-select-ui">
+    <button class="close-x" id="btnCloseEnv">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="es-header">
+      <div class="es-title">ENVIRONMENT</div>
+      <div class="es-sub">村の世界を選ぶ</div>
+    </div>
+    <div class="env-cards-row" id="envCardsRow"></div>
+    <div class="env-desc-panel" id="envDescPanel">Select a village atmosphere to play in.</div>
+    <button class="confirm-btn" id="btnConfirmEnv">
+      <svg viewBox="0 0 24 24" width="18" height="18"><polyline points="20,6 9,17 4,12"/></svg>
+      CONFIRM WORLD
+    </button>
+  </div>
+</div>
+
+<!-- ===== HOW TO PLAY ===== -->
+<div id="howToPlay" class="screen hidden">
+  <div class="htp-overlay">
+    <div class="htp-panel">
+      <button class="htp-close-btn" id="btnCloseHTP">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <div class="htp-header">
+        <div class="htp-header-icon">📖</div>
+        <div>
+          <div class="htp-title-text">HOW TO PLAY</div>
+          <div class="htp-subtitle-text">操作方法 • ゲームガイド</div>
+        </div>
+      </div>
+
+      <div class="htp-scroll">
+
+        <!-- CONTROLS -->
+        <div class="htp-section">
+          <div class="htp-section-title">
+            <span class="htp-section-icon">🎮</span> CONTROLS
+          </div>
+          <div class="htp-controls-grid">
+            <div class="htp-ctrl-card">
+              <div class="htp-ctrl-key">W / ↑ / SPACE</div>
+              <div class="htp-ctrl-act">
+                <span class="htp-ctrl-emoji">🦘</span> Jump
+              </div>
+            </div>
+            <div class="htp-ctrl-card">
+              <div class="htp-ctrl-key">SPACE × 2</div>
+              <div class="htp-ctrl-act">
+                <span class="htp-ctrl-emoji">✨</span> Double Jump
+              </div>
+            </div>
+            <div class="htp-ctrl-card">
+              <div class="htp-ctrl-key">S / ↓</div>
+              <div class="htp-ctrl-act">
+                <span class="htp-ctrl-emoji">🤸</span> Slide / Dodge
+              </div>
+            </div>
+            <div class="htp-ctrl-card">
+              <div class="htp-ctrl-key">SHIFT</div>
+              <div class="htp-ctrl-act">
+                <span class="htp-ctrl-emoji">💨</span> Dash Through
+              </div>
+            </div>
+            <div class="htp-ctrl-card">
+              <div class="htp-ctrl-key">A / D</div>
+              <div class="htp-ctrl-act">
+                <span class="htp-ctrl-emoji">↔️</span> Move Left / Right
+              </div>
+            </div>
+            <div class="htp-ctrl-card">
+              <div class="htp-ctrl-key">🖱 Click</div>
+              <div class="htp-ctrl-act">
+                <span class="htp-ctrl-emoji">🎯</span> Shoot at Cursor
+              </div>
+            </div>
+            <div class="htp-ctrl-card">
+              <div class="htp-ctrl-key">ESC / P</div>
+              <div class="htp-ctrl-act">
+                <span class="htp-ctrl-emoji">⏸</span> Pause Game
+              </div>
+            </div>
+            <div class="htp-ctrl-card htp-ctrl-mobile">
+              <div class="htp-ctrl-key">📱 Mobile</div>
+              <div class="htp-ctrl-act">
+                <span class="htp-ctrl-emoji">👆</span> ↓ Slide &nbsp;|&nbsp; ↑ Jump
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ENEMIES -->
+        <div class="htp-section">
+          <div class="htp-section-title">
+            <span class="htp-section-icon">👹</span> ENEMIES
+          </div>
+          <div class="htp-enemies-grid">
+            <div class="htp-enemy-card" style="--ec:#e07b39">
+              <div class="htp-enemy-avatar" style="background:rgba(224,123,57,0.15);border-color:rgba(224,123,57,0.45)">🦊</div>
+              <div class="htp-enemy-info">
+                <div class="htp-enemy-name" style="color:#e07b39">KITSUNE</div>
+                <div class="htp-enemy-type-badge">MELEE</div>
+                <div class="htp-enemy-desc">Fast fox spirit. Charges and slashes. Dodge or shoot from range.</div>
+              </div>
+            </div>
+            <div class="htp-enemy-card" style="--ec:#c03030">
+              <div class="htp-enemy-avatar" style="background:rgba(192,48,48,0.15);border-color:rgba(192,48,48,0.45)">👹</div>
+              <div class="htp-enemy-info">
+                <div class="htp-enemy-name" style="color:#c03030">ONI</div>
+                <div class="htp-enemy-type-badge" style="background:rgba(192,48,48,0.2);color:#c03030">HEAVY</div>
+                <div class="htp-enemy-desc">Massive demon warrior. Slow but hits hard. Shoot from distance.</div>
+              </div>
+            </div>
+            <div class="htp-enemy-card" style="--ec:#4040aa">
+              <div class="htp-enemy-avatar" style="background:rgba(64,64,170,0.15);border-color:rgba(64,64,170,0.45)">🦅</div>
+              <div class="htp-enemy-info">
+                <div class="htp-enemy-name" style="color:#6666dd">TENGU</div>
+                <div class="htp-enemy-type-badge" style="background:rgba(64,64,200,0.2);color:#8888ff">✈ FLYING</div>
+                <div class="htp-enemy-desc">Flies overhead, shoots projectiles, dive bombs at close range!</div>
+              </div>
+            </div>
+            <div class="htp-enemy-card" style="--ec:#00d4ff">
+              <div class="htp-enemy-avatar" style="background:rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.40)">🥷</div>
+              <div class="htp-enemy-info">
+                <div class="htp-enemy-name" style="color:#00d4ff">NINJA</div>
+                <div class="htp-enemy-type-badge" style="background:rgba(0,212,255,0.15);color:#00d4ff">FAST</div>
+                <div class="htp-enemy-desc">Lightning-fast dash attacks. React quickly or take heavy damage.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEMS + OBSTACLES side by side -->
+        <div class="htp-two-col">
+          <div class="htp-section">
+            <div class="htp-section-title">
+              <span class="htp-section-icon">🎁</span> POWER-UPS
+            </div>
+            <div class="htp-items-list">
+              <div class="htp-item-row"><span class="htp-item-icon" style="background:#2ecc7122">🍙</span><div><strong>ONIGIRI</strong> — Heal +35 HP</div></div>
+              <div class="htp-item-row"><span class="htp-item-icon" style="background:#88ccff22">🧧</span><div><strong>TALISMAN</strong> — Block one hit</div></div>
+              <div class="htp-item-row"><span class="htp-item-icon" style="background:#ffd58022">🍜</span><div><strong>RAMEN</strong> — Speed boost 5s</div></div>
+              <div class="htp-item-row"><span class="htp-item-icon" style="background:#ffb7c522">🌸</span><div><strong>SAKURA</strong> — +600 score bonus</div></div>
+              <div class="htp-item-row"><span class="htp-item-icon" style="background:#f5c84222">🪙</span><div><strong>COINS</strong> — Score + build combo</div></div>
+              <div class="htp-item-row"><span class="htp-item-icon" style="background:#e6394622">❤️</span><div><strong>HEART</strong> — Restore 25 HP</div></div>
+            </div>
+          </div>
+          <div class="htp-section">
+            <div class="htp-section-title">
+              <span class="htp-section-icon">⚠️</span> OBSTACLES
+            </div>
+            <div class="htp-obs-list">
+              <div class="htp-obs-row"><span class="htp-obs-tag jump">JUMP</span> Barrels, crates, rocks</div>
+              <div class="htp-obs-row"><span class="htp-obs-tag slide">SLIDE</span> Bamboo gates, low bars</div>
+              <div class="htp-obs-row"><span class="htp-obs-tag dash">DASH</span> Fences, carts</div>
+              <div class="htp-obs-row"><span class="htp-obs-tag warn">⚠</span> Red glow = DANGER!</div>
+              <div class="htp-obs-row"><span class="htp-obs-tag tip">TIP</span> Platforms have bonus coins</div>
+              <div class="htp-obs-row"><span class="htp-obs-tag tip">TIP</span> Combo multiplies score!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TIPS -->
+        <div class="htp-tips-banner">
+          <div class="htp-tips-title">💡 PRO TIPS</div>
+          <div class="htp-tips-row">
+            <div class="htp-tip-pill">Build COMBO for 3× score</div>
+            <div class="htp-tip-pill">SHOOT enemies from range</div>
+            <div class="htp-tip-pill">DASH is invincible frames</div>
+            <div class="htp-tip-pill">Aim at TENGU while they fly!</div>
+          </div>
+        </div>
+
+      </div><!-- end htp-scroll -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS ===== -->
+<div id="settingsScreen" class="screen hidden">
+  <div class="modal-backdrop">
+    <div class="modal-box">
+      <button class="close-x modal-close" id="btnCloseSettings">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal-title">SETTINGS</div>
+      <div class="modal-sub">設定</div>
+      <div class="settings-body">
+        <div class="set-card">
+          <div class="set-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+          <div class="set-info"><div class="set-label">Music</div></div>
+          <input type="range" class="ntr-slider" id="settingMusic" min="0" max="100" value="60"/>
+          <span class="set-val" id="musicVal">60</span>
+        </div>
+        <div class="set-card">
+          <div class="set-icon"><svg viewBox="0 0 24 24" width="20" height="20"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+          <div class="set-info"><div class="set-label">SFX</div></div>
+          <input type="range" class="ntr-slider" id="settingSFX" min="0" max="100" value="80"/>
+          <span class="set-val" id="sfxVal">80</span>
+        </div>
+        <div class="set-card">
+          <div class="set-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.28.22-.5.5-.5s.5.22.5.5v3.5H17V3.5c0-.28.22-.5.5-.5s.5.22.5.5v5c0 .83-.67 1.5-1.5 1.5h-2z"/><path d="M20 10H4v2h16v-2zM4 18h16v2H4zM4 14h16v2H4z"/></svg></div>
+          <div class="set-info"><div class="set-label">Difficulty</div></div>
+          <div class="seg-row">
+            <button class="seg-b" data-diff="easy">EASY</button>
+            <button class="seg-b seg-on" data-diff="medium">MEDIUM</button>
+            <button class="seg-b" data-diff="hard">HARD</button>
+          </div>
+        </div>
+        <div class="set-card">
+          <div class="set-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9 9 9 0 0 0 9-9 9 9 0 0 0-9-9zm0 4l2 4-4 3 2 2 3-2-1 4H10l-1-4 3 2-4-3 2-4z"/></svg></div>
+          <div class="set-info"><div class="set-label">Particles</div></div>
+          <div class="seg-row">
+            <button class="seg-b seg-on" data-particles="high">HIGH</button>
+            <button class="seg-b" data-particles="low">LOW</button>
+          </div>
+        </div>
+        <div class="set-card">
+          <div class="set-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M8 21H5a2 2 0 0 0-2-2v-3M21 16v3a2 2 0 0 0-2 2h-3"/></svg></div>
+          <div class="set-info"><div class="set-label">Fullscreen</div></div>
+          <button class="pill-btn" id="btnFullscreen">ENTER</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME CANVAS ===== -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- ===== HUD ===== -->
+<div id="hud" class="hidden">
+  <div class="hud-tl">
+    <div class="hud-hp-row">
+      <div class="hud-hp-icon">
+        <svg viewBox="0 0 24 24" width="12" height="12"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" fill="#e63946"/></svg>
+      </div>
+      <div class="hud-hp-track"><div class="hud-hp-fill" id="healthBar"></div></div>
+      <div class="hud-hp-num" id="healthText">100</div>
+      <div class="hud-shield hidden" id="shieldIcon">
+        <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#88ccff"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="hud-tc">
+    <div class="hud-score" id="scoreDisplay">000000</div>
+    <div class="hud-combo" id="comboDisplay"></div>
+  </div>
+
+  <div class="hud-tr">
+    <button class="hud-pause" id="btnPause">
+      <svg viewBox="0 0 24 24" width="18" height="18"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="hud-bl">
+    <div class="hud-speed-badge">
+      <span class="hsb-label">SPD</span>
+      <span id="speedDisplay">1.0×</span>
+    </div>
+  </div>
+
+  <div class="hud-br">
+    <div class="hud-best">
+      <svg viewBox="0 0 24 24" width="10" height="10"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" fill="#f5c842"/></svg>
+      <span id="hsDisplay">000000</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ROTATE HINT ===== -->
+<div id="rotateHint" style="display:none;position:fixed;inset:0;z-index:999;background:#04010a;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
+  <div style="font-size:3rem;animation:rotate-phone 1.5s ease-in-out infinite alternate;">📱</div>
+  <div style="font-family:'Orbitron',sans-serif;font-size:0.85rem;color:#f5c842;letter-spacing:0.2em;text-align:center;">ROTATE DEVICE<br><span style="font-size:0.6rem;color:rgba(240,232,216,0.5);letter-spacing:0.1em;">LANDSCAPE MODE REQUIRED</span></div>
+  <style>@keyframes rotate-phone{0%{transform:rotate(0deg)}100%{transform:rotate(90deg)}}</style>
+</div>
+
+<!-- ===== MOBILE CONTROLS ===== -->
+<div id="mobileControls" class="hidden">
+  <!-- Left side: JUMP + SLIDE via swipe, show hint -->
+  <div class="mc-left">
+    <div class="mc-swipe-hint">
+      <div class="mc-swipe-arrow mc-swipe-up">↑</div>
+      <div class="mc-swipe-label">SWIPE</div>
+      <div class="mc-swipe-arrow mc-swipe-down">↓</div>
+    </div>
+  </div>
+  <!-- Right side: DASH + SHOOT -->
+  <div class="mc-right">
+    <button class="mc-btn mc-dash" id="mbDash">
+      <svg viewBox="0 0 24 24" width="20" height="20"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>
+      <span class="mc-btn-label">DASH</span>
+    </button>
+    <button class="mc-btn mc-shoot" id="mbShoot">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M22 12h-6M4 12H2M4 12l3-4M4 12l3 4M16 6l-3 6 3 6" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+      <span class="mc-btn-label">SHOOT</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== PAUSE ===== -->
+<div id="pauseScreen" class="screen hidden">
+  <div class="pause-backdrop">
+    <div class="pause-card">
+      <div class="pause-logo">
+        <svg viewBox="0 0 24 24" width="32" height="32"><rect x="6" y="4" width="4" height="16" fill="#ff7a2f"/><rect x="14" y="4" width="4" height="16" fill="#ff7a2f"/></svg>
+      </div>
+      <div class="pause-title">PAUSED</div>
+      <div class="pause-sub">一時停止</div>
+      <div class="pause-actions">
+        <button class="pause-btn pause-btn-primary" id="btnResume">
+          <svg viewBox="0 0 24 24" width="18" height="18"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>
+          <span>RESUME</span>
+        </button>
+        <button class="pause-btn" id="btnRestartPause">
+          <svg viewBox="0 0 24 24" width="18" height="18"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-4.44"/></svg>
+          <span>RESTART</span>
+        </button>
+        <button class="pause-btn" id="btnPauseSettings">
+          <svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <span>SETTINGS</span>
+        </button>
+        <button class="pause-btn pause-btn-danger" id="btnMenuPause">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+          <span>MAIN MENU</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME OVER ===== -->
+<div id="gameOverScreen" class="screen hidden">
+  <div class="modal-backdrop">
+    <div class="modal-box go-box">
+      <div class="go-icon-row">
+        <svg viewBox="0 0 24 24" width="48" height="48"><circle cx="12" cy="12" r="10" fill="none" stroke="#e63946" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="#e63946" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="#e63946" stroke-width="2"/></svg>
+      </div>
+      <div class="go-title">MISSION FAILED</div>
+      <div class="go-sub">作戦失敗</div>
+      <div class="go-stats">
+        <div class="go-stat"><span>SCORE</span><span class="go-val gold" id="goScore">000000</span></div>
+        <div class="go-stat"><span>BEST</span><span class="go-val" id="goHighScore">000000</span></div>
+        <div class="go-stat"><span>TIME</span><span class="go-val" id="goTime">0:00</span></div>
+        <div class="go-stat"><span>MAX COMBO</span><span class="go-val" id="goCombo">0x</span></div>
+      </div>
+      <div class="go-record hidden" id="newRecord">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" fill="#f5c842"/></svg>
+        NEW RECORD！
+      </div>
+      <div class="go-btns">
+        <button class="confirm-btn" id="btnRestartGO">
+          <svg viewBox="0 0 24 24" width="18" height="18"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>
+          PLAY AGAIN
+        </button>
+        <button class="pill-btn" id="btnMenuGO">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          MENU
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
