@@ -1283,3 +1283,10 @@ canvas#gameCanvas{
   .hud-bl { bottom: 112px; }
   .hud-br { bottom: 112px; }
 }
+
+/* ── Fullscreen button states ── */
+#btnFullscreen { transition: all 0.2s; }
+#btnFullscreen[data-ios-pwa="true"] {
+  border-color: rgba(46,204,113,0.5) !important;
+  color: #2ecc71 !important;
+}

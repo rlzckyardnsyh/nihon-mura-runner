@@ -35,6 +35,34 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 
+  <!-- iOS fullscreen guide toast -->
+  <div id="iosFullscreenToast" style="
+    display:none; position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+    z-index:9998; width:min(320px,88vw);
+    background:linear-gradient(135deg,rgba(14,6,28,0.97),rgba(8,3,18,0.97));
+    border:1px solid rgba(255,107,26,0.35); border-radius:14px;
+    padding:0.85rem 1.1rem; box-shadow:0 8px 32px rgba(0,0,0,0.7);
+    font-family:'Orbitron',sans-serif; animation:toast-in 0.3s cubic-bezier(.34,1.56,.64,1);
+  ">
+    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;">
+      <span style="font-size:1.3rem;">📱</span>
+      <span style="font-size:0.6rem;font-weight:700;letter-spacing:0.15em;color:#f5c842;">FULLSCREEN DI IPHONE</span>
+      <button onclick="document.getElementById('iosFullscreenToast').style.display='none'" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:1rem;line-height:1;padding:0;">✕</button>
+    </div>
+    <div style="font-size:0.52rem;color:rgba(240,232,216,0.65);line-height:1.7;letter-spacing:0.05em;">
+      Safari tidak mengizinkan fullscreen browser.<br>
+      Untuk pengalaman fullscreen di iPhone:<br>
+      <span style="color:#ff9a40;">1.</span> Tap tombol <strong style="color:#fff;">Share</strong> (□↑) di Safari<br>
+      <span style="color:#ff9a40;">2.</span> Pilih <strong style="color:#fff;">"Add to Home Screen"</strong><br>
+      <span style="color:#ff9a40;">3.</span> Buka game dari icon di Home Screen
+    </div>
+    <div style="margin-top:0.55rem;height:1px;background:linear-gradient(90deg,transparent,rgba(255,107,26,0.3),transparent);"></div>
+    <div style="margin-top:0.45rem;font-size:0.46rem;color:rgba(240,232,216,0.35);letter-spacing:0.08em;text-align:center;">Jika sudah di Home Screen, game akan otomatis fullscreen</div>
+  </div>
+  <style>
+    @keyframes toast-in { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+  </style>
+
   <style>
     /* Rotate hint visibility is controlled 100% by JavaScript (_showRotateHint / _hideRotateHint).
        No CSS auto-trigger — prevents race with loading state machine. */

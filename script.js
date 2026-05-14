@@ -2290,10 +2290,122 @@ document.querySelectorAll('.seg-b[data-particles]').forEach(b=>{
   if(b.dataset.particles===Settings.particles)b.classList.add('seg-on');else b.classList.remove('seg-on');
   b.addEventListener('click',()=>{document.querySelectorAll('.seg-b[data-particles]').forEach(x=>x.classList.remove('seg-on'));b.classList.add('seg-on');Settings.particles=b.dataset.particles;SFX.ui();});
 });
-document.getElementById('btnFullscreen')?.addEventListener('click',()=>{
-  if(!document.fullscreenElement){document.documentElement.requestFullscreen().catch(()=>{});document.getElementById('btnFullscreen').textContent='EXIT';}
-  else{document.exitFullscreen();document.getElementById('btnFullscreen').textContent='ENTER';}
-});
+// =====================================================
+// § FULLSCREEN — Android native + iOS PWA fallback
+// =====================================================
+(function initFullscreen() {
+  const btn = document.getElementById('btnFullscreen');
+  if (!btn) return;
+
+  // ── Platform detection ──
+  const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const isMobile  = isIOS || isAndroid || ('ontouchstart' in window);
+
+  // ── Fullscreen API helpers (cross-browser) ──
+  function fsEnter(el) {
+    const fn = el.requestFullscreen       ||
+               el.webkitRequestFullscreen ||
+               el.mozRequestFullScreen    ||
+               el.msRequestFullscreen;
+    if (fn) return fn.call(el);
+    return Promise.reject(new Error('no_api'));
+  }
+  function fsExit() {
+    const fn = document.exitFullscreen       ||
+               document.webkitExitFullscreen ||
+               document.mozCancelFullScreen  ||
+               document.msExitFullscreen;
+    if (fn) fn.call(document);
+  }
+  function fsActive() {
+    return !!(document.fullscreenElement       ||
+              document.webkitFullscreenElement ||
+              document.mozFullScreenElement    ||
+              document.msFullscreenElement);
+  }
+
+  // ── Sync button label whenever fullscreen state changes ──
+  ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','msfullscreenchange']
+    .forEach(ev => document.addEventListener(ev, () => {
+      btn.textContent = fsActive() ? 'EXIT' : 'ENTER';
+      btn.style.borderColor = fsActive() ? 'rgba(255,107,26,0.6)' : '';
+      btn.style.color       = fsActive() ? 'var(--c-orange)'      : '';
+    }));
+
+  // ── iOS: show PWA guide toast ──
+  function showIOSGuide() {
+    const toast = document.getElementById('iosFullscreenToast');
+    if (!toast) return;
+    // Check if already running as standalone PWA (already fullscreen)
+    const isPWA = window.navigator.standalone === true;
+    if (isPWA) {
+      // Already fullscreen via PWA — button should say so
+      btn.textContent   = 'PWA ✓';
+      btn.style.color   = '#2ecc71';
+      btn.style.borderColor = 'rgba(46,204,113,0.5)';
+      return;
+    }
+    // Show guide toast
+    toast.style.display = 'block';
+    // Auto-dismiss after 8 seconds
+    clearTimeout(toast._dismissTimer);
+    toast._dismissTimer = setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.4s ease';
+      setTimeout(() => { toast.style.display = 'none'; toast.style.opacity = '1'; toast.style.transition = ''; }, 400);
+    }, 8000);
+  }
+
+  // ── Set initial button state ──
+  if (isIOS) {
+    const isPWA = window.navigator.standalone === true;
+    if (isPWA) {
+      btn.textContent   = 'PWA ✓';
+      btn.style.color   = '#2ecc71';
+      btn.style.borderColor = 'rgba(46,204,113,0.5)';
+      btn.title = 'Game berjalan dalam mode fullscreen PWA';
+    } else {
+      btn.textContent = 'GUIDE';
+      btn.title = 'Tap untuk cara fullscreen di iPhone';
+    }
+  }
+
+  // ── Click handler ──
+  btn.addEventListener('click', () => {
+    if (typeof SFX !== 'undefined') SFX.ui?.();
+
+    // iOS Safari — native fullscreen API tidak tersedia
+    if (isIOS) {
+      showIOSGuide();
+      return;
+    }
+
+    // Android / Desktop — native fullscreen API
+    if (!fsActive()) {
+      fsEnter(document.documentElement)
+        .then(() => {
+          btn.textContent   = 'EXIT';
+          btn.style.borderColor = 'rgba(255,107,26,0.6)';
+          btn.style.color   = 'var(--c-orange)';
+        })
+        .catch(() => {
+          // Fallback: jika API ada tapi gagal (misal butuh gesture)
+          // Coba lagi dengan element yang lebih spesifik
+          fsEnter(document.body).catch(() => {
+            btn.textContent = 'N/A';
+            btn.title = 'Fullscreen tidak didukung browser ini';
+          });
+        });
+    } else {
+      fsExit();
+      btn.textContent   = 'ENTER';
+      btn.style.borderColor = '';
+      btn.style.color   = '';
+    }
+  });
+})();
 
 // Mobile
 function mbtn(id,dn,up){
