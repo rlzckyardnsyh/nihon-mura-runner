@@ -36,6 +36,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 
   <style>
+    /* Rotate hint visibility is controlled 100% by JavaScript (_showRotateHint / _hideRotateHint).
+       No CSS auto-trigger — prevents race with loading state machine. */
     #rotateHint { display: none; }
   </style>
 
@@ -438,15 +440,18 @@
   </div>
 </div>
 
-<!-- ===== ROTATE HINT ===== -->
+<!-- ===== ROTATE HINT (JS-controlled only — see _showRotateHint / _hideRotateHint) ===== -->
 <div id="rotateHint" style="display:none;position:fixed;inset:0;z-index:9999;background:#04010a;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;">
   <div style="font-size:3.5rem;animation:rotate-phone 1.5s ease-in-out infinite alternate;">📱</div>
-  <div style="font-family:'Orbitron',sans-serif;font-size:0.9rem;color:#f5c842;letter-spacing:0.2em;text-align:center;line-height:1.8;">
-    ROTATE DEVICE
-    <div style="font-size:0.58rem;color:rgba(240,232,216,0.5);letter-spacing:0.12em;margin-top:4px;">LANDSCAPE MODE REQUIRED</div>
+  <div style="font-family:'Orbitron',sans-serif;text-align:center;line-height:2;">
+    <div style="font-size:0.9rem;color:#f5c842;letter-spacing:0.22em;font-weight:700;">ROTATE DEVICE</div>
+    <div style="font-size:0.58rem;color:rgba(240,232,216,0.5);letter-spacing:0.14em;">LANDSCAPE MODE REQUIRED</div>
   </div>
-  <div style="width:48px;height:2px;background:linear-gradient(90deg,transparent,#ff6b1a,transparent);border-radius:2px;"></div>
-  <style>@keyframes rotate-phone{0%{transform:rotate(0deg)}100%{transform:rotate(90deg)}}</style>
+  <div style="width:52px;height:2px;background:linear-gradient(90deg,transparent,#ff6b1a,transparent);border-radius:2px;animation:hint-line 2s ease-in-out infinite alternate;"></div>
+  <style>
+    @keyframes rotate-phone { 0%{transform:rotate(0deg)} 100%{transform:rotate(90deg)} }
+    @keyframes hint-line     { 0%{opacity:0.3;width:30px} 100%{opacity:1;width:70px} }
+  </style>
 </div>
 
 <!-- ===== MOBILE CONTROLS ===== -->
