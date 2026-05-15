@@ -145,49 +145,87 @@
 <!-- ===== CHARACTER SELECT ===== -->
 <div id="charSelectScreen" class="screen hidden">
   <canvas id="charBgCanvas" class="full-canvas"></canvas>
-  <div class="char-select-ui">
-    <button class="close-x" id="btnCloseChar">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
+  <!-- Ambient overlay -->
+  <div class="csel-ambient" aria-hidden="true"></div>
+
+  <div class="csel-wrap">
+    <!-- CLOSE -->
+    <button class="csel-close" id="btnCloseChar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-    <div class="cs-header">
-      <div class="cs-title">CHARACTER SELECT</div>
-      <div class="cs-sub">エージェント選択</div>
+
+    <!-- HEADER -->
+    <div class="csel-header">
+      <div class="csel-header-tag">エージェント選択</div>
+      <div class="csel-header-title">SELECT AGENT</div>
+      <div class="csel-header-line"></div>
     </div>
-    <div class="cs-layout">
-      <!-- Left: preview + carousel nav -->
-      <div class="cs-preview-col">
-        <div class="cs-spotlight"></div>
-        <canvas id="charPreviewCanvas" class="char-preview-canvas"></canvas>
-        <div class="cs-carousel-nav">
-          <button class="cs-nav-btn" id="charPrev">
-            <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
-          </button>
-          <div class="cs-dots" id="charDots"></div>
-          <button class="cs-nav-btn" id="charNext">
-            <svg viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg>
-          </button>
+
+    <!-- MAIN LAYOUT -->
+    <div class="csel-body">
+
+      <!-- LEFT: Character Preview -->
+      <div class="csel-left">
+        <!-- Nav arrows -->
+        <button class="csel-arrow csel-arrow-left" id="charPrev">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+
+        <!-- Preview stage -->
+        <div class="csel-stage">
+          <div class="csel-stage-glow" id="cselStageGlow"></div>
+          <canvas id="charPreviewCanvas" class="char-preview-canvas"></canvas>
+          <div class="csel-stage-floor"></div>
+          <!-- Floating rarity indicator on canvas -->
+          <div class="csel-rarity-float" id="csRarityBadge">◆ RARE</div>
+        </div>
+
+        <button class="csel-arrow csel-arrow-right" id="charNext">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
+        </button>
+
+        <!-- Dots -->
+        <div class="csel-dots" id="charDots"></div>
+      </div>
+
+      <!-- RIGHT: Character Info -->
+      <div class="csel-right">
+        <!-- Name block -->
+        <div class="csel-name-block">
+          <div class="csel-char-role" id="csCharRole">STREET OPS</div>
+          <div class="csel-char-name" id="csCharName">KENJI</div>
+          <div class="csel-name-underline" id="cselNameUnderline"></div>
+        </div>
+
+        <!-- Divider -->
+        <div class="csel-divider"></div>
+
+        <!-- Description -->
+        <p class="csel-char-desc" id="csCharDesc">—</p>
+
+        <!-- Stats -->
+        <div class="csel-stats" id="csStats"></div>
+
+        <!-- Skill -->
+        <div class="csel-skill-block" id="csSkillBlock"></div>
+
+        <!-- Weapon -->
+        <div class="csel-weapon-row">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h10M18 12h2M10 8v8"/></svg>
+          <span class="csel-weapon-label">WEAPON</span>
+          <span class="csel-weapon-val" id="csWeapon">—</span>
         </div>
       </div>
-      <!-- Right: info -->
-      <div class="cs-info-col">
-        <div class="cs-rarity-badge" id="csRarityBadge">RARE</div>
-        <div class="cs-char-name" id="csCharName">KENJI</div>
-        <div class="cs-char-role" id="csCharRole">STREET OPS</div>
-        <div class="cs-divider"></div>
-        <div class="cs-char-desc" id="csCharDesc">—</div>
-        <div class="cs-stats-block" id="csStats"></div>
-        <div class="cs-skill-block" id="csSkillBlock"></div>
-        <div class="cs-weapon-label">
-          <svg viewBox="0 0 24 24" width="13" height="13"><path d="M4 12h10M18 12h2M10 8v8" stroke="currentColor" fill="none" stroke-width="2"/></svg>
-          WEAPON: <span id="csWeapon">—</span>
-        </div>
-      </div>
-    </div>
-    <div class="cs-bottom-bar">
-      <div class="cs-selected-tag" id="csSelectedTag">CURRENTLY SELECTED: —</div>
-      <button class="confirm-btn" id="btnConfirmChar">
-        <svg viewBox="0 0 24 24" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
-        SELECT AGENT
+
+    </div><!-- /csel-body -->
+
+    <!-- BOTTOM BAR -->
+    <div class="csel-bottom">
+      <div class="csel-active-tag" id="csSelectedTag">ACTIVE: —</div>
+      <button class="csel-confirm-btn" id="btnConfirmChar">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+        DEPLOY AGENT
       </button>
     </div>
   </div>
@@ -533,33 +571,84 @@
 
 <!-- ===== GAME OVER ===== -->
 <div id="gameOverScreen" class="screen hidden">
-  <div class="modal-backdrop">
-    <div class="modal-box go-box">
-      <div class="go-icon-row">
-        <svg viewBox="0 0 24 24" width="48" height="48"><circle cx="12" cy="12" r="10" fill="none" stroke="#e63946" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="#e63946" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="#e63946" stroke-width="2"/></svg>
+  <div class="go-overlay">
+    <!-- Animated bg shards -->
+    <div class="go-shards" aria-hidden="true">
+      <div class="go-shard go-shard-1"></div>
+      <div class="go-shard go-shard-2"></div>
+      <div class="go-shard go-shard-3"></div>
+      <div class="go-shard go-shard-4"></div>
+    </div>
+    <div class="go-panel">
+      <!-- Top accent bar -->
+      <div class="go-top-bar"></div>
+
+      <!-- GAME OVER HEADER -->
+      <div class="go-header">
+        <div class="go-skull-wrap">
+          <svg class="go-skull-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="20" r="14" stroke="#e63946" stroke-width="2.2" fill="rgba(230,57,70,0.08)"/>
+            <circle cx="18.5" cy="18.5" r="3.5" fill="#e63946" opacity="0.85"/>
+            <circle cx="29.5" cy="18.5" r="3.5" fill="#e63946" opacity="0.85"/>
+            <path d="M19 26h10M21 29h6" stroke="#e63946" stroke-width="2" stroke-linecap="round"/>
+            <path d="M17 34v4h4v-3h6v3h4v-4" stroke="#e63946" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="24" y1="6" x2="24" y2="3" stroke="#e63946" stroke-width="1.5" opacity="0.5"/>
+            <line x1="35" y1="9" x2="37" y2="7" stroke="#e63946" stroke-width="1.5" opacity="0.5"/>
+            <line x1="13" y1="9" x2="11" y2="7" stroke="#e63946" stroke-width="1.5" opacity="0.5"/>
+          </svg>
+          <div class="go-skull-ring"></div>
+        </div>
+        <div class="go-title-wrap">
+          <div class="go-eyebrow">— 作戦失敗 —</div>
+          <div class="go-title">GAME OVER</div>
+          <div class="go-title-line"></div>
+        </div>
       </div>
-      <div class="go-title">MISSION FAILED</div>
-      <div class="go-sub">作戦失敗</div>
-      <div class="go-stats">
-        <div class="go-stat"><span>SCORE</span><span class="go-val gold" id="goScore">000000</span></div>
-        <div class="go-stat"><span>BEST</span><span class="go-val" id="goHighScore">000000</span></div>
-        <div class="go-stat"><span>TIME</span><span class="go-val" id="goTime">0:00</span></div>
-        <div class="go-stat"><span>MAX COMBO</span><span class="go-val" id="goCombo">0x</span></div>
+
+      <!-- STATS GRID -->
+      <div class="go-stats-grid">
+        <div class="go-stat-card go-stat-score">
+          <div class="go-stat-label">SCORE</div>
+          <div class="go-stat-value go-val-score" id="goScore">000000</div>
+        </div>
+        <div class="go-stat-card go-stat-best">
+          <div class="go-stat-label">
+            <svg viewBox="0 0 14 14" width="10" height="10"><path d="M7 1l1.75 3.9H13L9.5 7.6l1.35 4.1L7 9.5l-3.85 2.2L4.5 7.6 1 4.9h4.25z" fill="#f5c842"/></svg>
+            BEST
+          </div>
+          <div class="go-stat-value" id="goHighScore">000000</div>
+        </div>
+        <div class="go-stat-card">
+          <div class="go-stat-label">TIME</div>
+          <div class="go-stat-value" id="goTime">0:00</div>
+        </div>
+        <div class="go-stat-card">
+          <div class="go-stat-label">MAX COMBO</div>
+          <div class="go-stat-value" id="goCombo">0×</div>
+        </div>
       </div>
-      <div class="go-record hidden" id="newRecord">
-        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" fill="#f5c842"/></svg>
-        NEW RECORD！
+
+      <!-- NEW RECORD BADGE -->
+      <div class="go-record-badge hidden" id="newRecord">
+        <svg viewBox="0 0 20 20" width="16" height="16"><path d="M10 1l2.4 5.4L18 7.6l-4 4 .9 5.6L10 14.5l-4.9 2.7.9-5.6-4-4 5.6-.6z" fill="#f5c842"/></svg>
+        <span>NEW RECORD</span>
+        <svg viewBox="0 0 20 20" width="16" height="16"><path d="M10 1l2.4 5.4L18 7.6l-4 4 .9 5.6L10 14.5l-4.9 2.7.9-5.6-4-4 5.6-.6z" fill="#f5c842"/></svg>
       </div>
-      <div class="go-btns">
-        <button class="confirm-btn" id="btnRestartGO">
+
+      <!-- ACTION BUTTONS -->
+      <div class="go-actions">
+        <button class="go-btn go-btn-primary" id="btnRestartGO">
           <svg viewBox="0 0 24 24" width="18" height="18"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>
           PLAY AGAIN
         </button>
-        <button class="pill-btn" id="btnMenuGO">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-          MENU
+        <button class="go-btn go-btn-secondary" id="btnMenuGO">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          MAIN MENU
         </button>
       </div>
+
+      <!-- Bottom accent -->
+      <div class="go-bottom-bar"></div>
     </div>
   </div>
 </div>

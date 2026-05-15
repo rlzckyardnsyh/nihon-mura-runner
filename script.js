@@ -268,31 +268,84 @@ const SFX={
   explosion:()=>{noise(0.18,0.3,150,200);tone(80,'sawtooth',0.3,0.25,0.05);},
 };
 
+// ── ACTION MUSIC ENGINE ──
+// Modern cinematic action/shooter music using Web Audio API
+// Replaces the old Bali gamelan-like tones with aggressive, immersive beats.
 let musicInt=null, mStep=0, stepTimer=0;
-const M_NOTES=[293,329,370,440,493,440,370,329,293,247,220,247,329,370,440];
-const M_BASS=[73,73,98,73,65,65,73,98];
-const M_HI=[880,1047,880,784,880,784,660,880];
+
+// ── PLAY MUSIC HELPERS ──
+function toneM(freq,type,dur,vol,delay,dest){
+  if(!aCtx) return; const d=dest||(musicGain||masterGain); if(!d) return;
+  try{
+    const o=aCtx.createOscillator(),g=aCtx.createGain();
+    o.connect(g); g.connect(d); o.type=type;
+    o.frequency.setValueAtTime(freq,aCtx.currentTime+delay);
+    g.gain.setValueAtTime(Math.min(0.9,vol),aCtx.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(0.0001,aCtx.currentTime+delay+dur);
+    o.start(aCtx.currentTime+delay); o.stop(aCtx.currentTime+delay+dur+0.02);
+  }catch(e){}
+}
+function noiseM(dur,vol,freq,bw,delay){
+  if(!aCtx||!musicGain) return;
+  try{
+    const buf=aCtx.createBuffer(1,aCtx.sampleRate*dur,aCtx.sampleRate);
+    const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1);
+    const src=aCtx.createBufferSource(),flt=aCtx.createBiquadFilter(),g=aCtx.createGain();
+    flt.type='bandpass'; flt.frequency.value=freq; flt.Q.value=bw/freq;
+    g.gain.setValueAtTime(vol,aCtx.currentTime+(delay||0));
+    g.gain.exponentialRampToValueAtTime(0.0001,aCtx.currentTime+(delay||0)+dur);
+    src.buffer=buf; src.connect(flt); flt.connect(g); g.connect(musicGain);
+    src.start(aCtx.currentTime+(delay||0)); src.stop(aCtx.currentTime+(delay||0)+dur+0.01);
+  }catch(e){}
+}
+
+// Game Music: Aggressive cinematic action pulse
+// Pattern: 4/4 rhythm, driving bass, tension arp, percussion
+const ACT_BASS=[55,55,65,55,49,49,55,65];        // Low bass line (A1,A1,C2,A1,G1...)
+const ACT_MID =[220,246,261,220,196,220,246,261]; // Tension mid notes
+const ACT_LEAD=[440,494,523,440,392,440,494,392]; // Lead melody
 function startMusic(){
   if(!aCtx) return; stopMusic(); mStep=0;
+  const bpm=140, beat=60000/bpm;
   musicInt=setInterval(()=>{
     if(S.screen!=='playing') return;
-    const n=M_NOTES[mStep%M_NOTES.length], b=M_BASS[mStep%M_BASS.length];
-    tone(n,'sine',0.38,0.32,0,musicGain); tone(b,'sawtooth',0.5,0.16,0,musicGain);
-    if(mStep%2===0) tone(M_HI[mStep%M_HI.length],'sine',0.12,0.08,0.18,musicGain);
-    if(mStep%8===0) tone(b*0.5,'sine',0.5,0.12,0.1,musicGain);
+    const b16=mStep%16, b8=mStep%8, b4=mStep%4, b2=mStep%2;
+    // KICK on beat 1 and 3 (every 4 steps in 16th note grid)
+    if(b4===0){ noiseM(0.12,0.28,80,60,0); toneM(ACT_BASS[b8],'sawtooth',0.22,0.26,0,musicGain); }
+    // SNARE on beat 2 and 4
+    if(b4===2){ noiseM(0.10,0.18,200,180,0); }
+    // HI-HAT closed on every 8th, open on offbeat 16ths
+    if(b2===0){ noiseM(0.04,0.08,8000,3000,0); }
+    else       { noiseM(0.02,0.04,10000,4000,0); }
+    // BASS drives on every beat
+    if(b4===0||b4===2){ toneM(ACT_BASS[b8]*0.5,'sine',beat/850,0.18,0,musicGain); }
+    // TENSION SYNTH - sawtooth mid on offbeats creates drive
+    if(b4===1){ toneM(ACT_MID[b8],'sawtooth',0.18,0.10,0,musicGain); }
+    // LEAD ARP every 8 steps
+    if(b16===0||b16===8){ toneM(ACT_LEAD[b8],'square',0.28,0.10,0,musicGain); toneM(ACT_LEAD[b8]*1.5,'square',0.16,0.06,0.08,musicGain); }
+    // CINEMATIC SWELL every 32 steps
+    if(mStep%32===0){ toneM(ACT_BASS[0]*0.5,'sawtooth',0.5,0.08,0.1,musicGain); }
     mStep++;
-  },320);
+  },beat/4); // 16th note resolution
 }
+
+// Menu Music: Tense, atmospheric cinematic — not Bali gamelan
+const MNU_NOTES=[220,246,261,220,196,175,196,220];
+const MNU_PAD  =[110,123,130,110,98,87,98,110];
 function startMenuMusic(){
   if(!aCtx) return; stopMusic(); mStep=0;
   musicInt=setInterval(()=>{
     if(S.screen==='playing') return;
-    const n=M_NOTES[mStep%M_NOTES.length];
-    tone(n,'sine',0.65,0.13,0,musicGain);
-    if(mStep%5===0) tone(n*0.5,'sine',0.7,0.07,0.25,musicGain);
-    if(mStep%7===0) tone(n*3,'sine',0.18,0.05,0.12,musicGain);
+    const b=mStep%8;
+    // Atmospheric pad
+    toneM(MNU_PAD[b],'sine',0.75,0.12,0,musicGain);
+    toneM(MNU_PAD[b]*1.5,'sine',0.65,0.06,0.1,musicGain);
+    // Tension pulse on strong beats
+    if(mStep%4===0){ noiseM(0.06,0.05,400,200,0); toneM(MNU_NOTES[b],'sawtooth',0.35,0.10,0,musicGain); }
+    // High cinematic shimmer
+    if(mStep%6===0){ toneM(MNU_NOTES[b]*4,'sine',0.25,0.04,0.18,musicGain); }
     mStep++;
-  },460);
+  },480);
 }
 function stopMusic(){ if(musicInt){clearInterval(musicInt);musicInt=null;} }
 function maybeStep(){
@@ -1075,15 +1128,35 @@ const Player={
   },
 };
 
+// ── DAMAGE FLASH — smooth, responsive, natural ──
+// Two-phase: sharp spike hold then fast exponential fade. No stuttery slowmo.
 let damageFlashAlpha=0;
-function showDamageFlash(){damageFlashAlpha=0.38;}
+let _dmgFlashTime=0;
+function showDamageFlash(){
+  damageFlashAlpha=0.55;
+  _dmgFlashTime=performance.now();
+}
 function drawDamageFlash(){
-  if(damageFlashAlpha<=0) return;
-  ctx.save();ctx.globalAlpha=damageFlashAlpha;
-  const dg=ctx.createRadialGradient(W/2,H/2,H*0.25,W/2,H/2,H*0.85);
-  dg.addColorStop(0,'transparent');dg.addColorStop(1,'rgba(230,50,50,0.8)');
-  ctx.fillStyle=dg;ctx.fillRect(0,0,W,H);ctx.restore();
-  damageFlashAlpha=Math.max(0,damageFlashAlpha-0.022);
+  if(damageFlashAlpha<=0.004){ damageFlashAlpha=0; return; }
+  const elapsed=performance.now()-_dmgFlashTime;
+  if(elapsed<60){
+    damageFlashAlpha=0.55;
+  } else {
+    damageFlashAlpha*=0.87;
+  }
+  ctx.save();
+  ctx.globalAlpha=damageFlashAlpha;
+  const dg=ctx.createRadialGradient(W/2,H/2,H*0.12,W/2,H/2,H*0.88);
+  dg.addColorStop(0,'rgba(230,20,20,0.15)');
+  dg.addColorStop(0.55,'rgba(230,20,20,0.40)');
+  dg.addColorStop(1,'rgba(200,0,0,0.88)');
+  ctx.fillStyle=dg; ctx.fillRect(0,0,W,H);
+  if(elapsed<80){
+    ctx.globalAlpha=damageFlashAlpha*(1-elapsed/80)*0.45;
+    ctx.fillStyle='rgba(255,60,60,0.55)';
+    ctx.fillRect(0,0,W,H);
+  }
+  ctx.restore();
 }
 
 function drawGunnerSprite(c,x,y,w,h,state,frame,dashing,sliding,jumping,onGround,ch,aimAngle){
@@ -1989,7 +2062,7 @@ function openCharSelect(){
 function buildCharDots(){
   const d=document.getElementById('charDots');d.innerHTML='';
   CHARS.forEach((_,i)=>{
-    const dot=document.createElement('div');dot.className='cs-dot'+(i===charIdx?' active':'');
+    const dot=document.createElement('div');dot.className='csel-dot'+(i===charIdx?' active':'');
     dot.addEventListener('click',()=>{charIdx=i;updateCharUI();buildCharDots();SFX.ui();});d.appendChild(dot);
   });
 }
@@ -2003,22 +2076,28 @@ function updateCharUI(){
   const rarityEl=document.getElementById('csRarityBadge');
   if(rarityEl){
     rarityEl.textContent='◆ '+(ch.rarity||'RARE');
-    rarityEl.className='cs-rarity-badge cs-rarity-'+(ch.rarity||'RARE').toLowerCase();
+    rarityEl.className='csel-rarity-float cs-rarity-'+(ch.rarity||'RARE').toLowerCase();
   }
+  // Name underline accent color
+  const ul=document.getElementById('cselNameUnderline');
+  if(ul) ul.style.background=`linear-gradient(90deg,${ch.accentColor},transparent)`;
+  // Stage glow color
+  const sg=document.getElementById('cselStageGlow');
+  if(sg) sg.style.background=`radial-gradient(ellipse 60% 80% at 50% 100%,${ch.accentColor}30 0%,transparent 70%)`;
   // Legacy fallback
   const rarityEl2=document.getElementById('csRarity');
   if(rarityEl2){rarityEl2.textContent=ch.rarity||'RARE';rarityEl2.style.color=ch.rarity==='LEGENDARY'?'#f5c842':ch.rarity==='EPIC'?'#b060ff':'#4ab0ff';}
   // Skill block
   const skillBlock=document.getElementById('csSkillBlock');
   if(skillBlock){
-    skillBlock.innerHTML=`<div class="cs-skill-tag"><span class="cs-skill-name" style="color:${ch.accentColor}">${ch.skillName||''}</span><span class="cs-skill-desc">${ch.skillDesc||''}</span></div>`;
+    skillBlock.innerHTML=`<div class="csel-skill-tag" style="border-color:${ch.accentColor}44;background:${ch.accentColor}11"><span class="csel-skill-name" style="color:${ch.accentColor}">${ch.skillName||''}</span><span class="csel-skill-desc">${ch.skillDesc||''}</span></div>`;
   }
   const skillEl=document.getElementById('csSkill');
   if(skillEl)skillEl.innerHTML=`<span style="color:${ch.accentColor}">${ch.skillName||''}</span> — ${ch.skillDesc||''}`;
-  document.getElementById('csStats').innerHTML=[['SPEED',ch.spd],['ATTACK',ch.atk],['DEFENSE',ch.hp]].map(([l,v])=>`<div class="cs-stat-row"><div class="cs-stat-label">${l}</div><div class="cs-stat-track"><div class="cs-stat-fill" style="width:${v*10}%;background:linear-gradient(90deg,${ch.accentColor},${ch.accentColor}cc);box-shadow:0 0 8px ${ch.accentColor}88"></div></div><div class="cs-stat-num">${v}</div></div>`).join('');
+  document.getElementById('csStats').innerHTML=[['SPEED',ch.spd],['ATTACK',ch.atk],['DEFENSE',ch.hp]].map(([l,v])=>`<div class="csel-stat-row"><div class="csel-stat-label">${l}</div><div class="csel-stat-track"><div class="csel-stat-fill" style="width:${v*10}%;background:linear-gradient(90deg,${ch.accentColor},${ch.accentColor}cc);box-shadow:0 0 8px ${ch.accentColor}88"></div></div><div class="csel-stat-num">${v}</div></div>`).join('');
   // Update selected tag
   const stag=document.getElementById('csSelectedTag');
-  if(stag){ const cur=CHARS.find(c=>c.id===Settings.charId); stag.textContent=cur?`ACTIVE: ${cur.name}`:''; }
+  if(stag){ const cur=CHARS.find(c=>c.id===Settings.charId); stag.textContent=cur?`ACTIVE: ${cur.name}`:'SELECT TO DEPLOY'; }
 }
 function startCharPreview(){
   if(charAnimId)cancelAnimationFrame(charAnimId);
@@ -2416,12 +2495,46 @@ function mbtn(id,dn,up){
 }
 // Only dash button + shoot button now; jump/slide via canvas swipe
 mbtn('mbDash',()=>{K.dash=1;K.shift=1;},()=>K.shift=0);
+// ── AUTO AIM (mobile only) ──
+// Finds the highest-priority enemy: closest AND most threatening.
+// Priority: nearby enemies weighted by closeness + slight preference for ahead-of-player.
+function _mobileAutoAim(){
+  if(!enemies.length){
+    // No enemies: aim straight ahead far right
+    S.mx=W*0.85; S.my=Player.y+Player.h*0.35;
+    return;
+  }
+  let best=null, bestScore=-Infinity;
+  const px=Player.x+Player.w*0.9, py=Player.y+Player.h*0.35;
+  for(let i=0;i<enemies.length;i++){
+    const e=enemies[i];
+    const ex=e.x+e.w/2, ey=e.y+e.h/2;
+    const dx=ex-px, dy=ey-py;
+    const dist=Math.sqrt(dx*dx+dy*dy)+1;
+    // Prefer enemies in front (positive dx) and closer
+    // Flying enemies (tengu) are extra priority — they shoot at player
+    const flyBonus=e.type==='flying'?1.35:1.0;
+    // Prefer enemies within screen and in front
+    const inFront=dx>-80?1.0:0.55;
+    const score=(flyBonus*inFront*1000)/dist;
+    if(score>bestScore){ bestScore=score; best=e; }
+  }
+  if(best){
+    S.mx=best.x+best.w/2;
+    S.my=best.y+best.h*0.4; // aim at center-upper body for better hit
+  }
+}
+
 document.getElementById('mbShoot')?.addEventListener('touchstart',e=>{
   e.stopPropagation();
   if(!aCtx)initAudio();
-  if(enemies.length){const ne=enemies.reduce((a,b)=>Math.abs(a.x-Player.x)<Math.abs(b.x-Player.x)?a:b);S.mx=ne.x+ne.w/2;S.my=ne.y+ne.h/2;}
-  else{S.mx=W;S.my=Player.y+Player.h*0.35;}
+  _mobileAutoAim(); // auto-aim to best target
   K.shoot=1;
+},{passive:true});
+// Also keep shooting while held (repeat fire on mobile)
+document.getElementById('mbShoot')?.addEventListener('touchmove',e=>{
+  e.stopPropagation();
+  if(S.screen==='playing'){ _mobileAutoAim(); K.shoot=1; }
 },{passive:true});
 
 // Canvas swipe: UP = jump, DOWN = slide, RIGHT = dash
