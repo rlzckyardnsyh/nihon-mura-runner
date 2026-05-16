@@ -2111,174 +2111,188 @@ function startCharPreview(){
   const cp=document.getElementById('charPreviewCanvas');if(!cp)return;
   const cc=cp.getContext('2d');
   let frame=0,rotY=0,rotSpd=0.016;
+  let lastW=0,lastH=0;
 
+  // Fix: sync canvas buffer size to CSS size — NO cc.scale inside loop
   function syncCanvas(){
-    const r=cp.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
-    const w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));
-    if(cp.width!==w||cp.height!==h){cp.width=w;cp.height=h;cc.scale(dpr,dpr);}
+    const r=cp.getBoundingClientRect();
+    const dpr=window.devicePixelRatio||1;
+    const w=Math.round(r.width*dpr), h=Math.round(r.height*dpr);
+    if(w<1||h<1) return false;
+    if(cp.width!==w||cp.height!==h){
+      cp.width=w; cp.height=h;
+      lastW=w; lastH=h;
+    }
+    return true;
   }
 
-  // Draw a stylish humanoid soldier character
-  function drawChar(ctx,ch,cx,cy,scale,t,sinR,cosR){
-    const s=scale;
-    const bob=Math.sin(t*0.05)*2.5;
-    const breathe=Math.sin(t*0.04)*1.2;
-    const legSwing=Math.sin(t*0.06)*16;
-    const armSwing=Math.sin(t*0.06+Math.PI)*14;
-    const depthB=0.65+cosR*0.35; // back limb depth
-    const depthF=0.92; // front limb
-
-    // ── SHADOW ──
-    ctx.save();
-    ctx.globalAlpha=0.38;
-    ctx.fillStyle='rgba(0,0,0,0.7)';
-    ctx.beginPath();
-    ctx.ellipse(cx+sinR*s*0.08,cy+s*0.52+bob,s*0.28,s*0.055,0,0,Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-
-    // Helper: rounded rect
+  // Combat-ready aiming pose — shoulders wide, gun raised to eye level
+  // Only breathing + subtle sway, NO walking. Looks like a soldier aiming.
+  function drawChar(ctx,ch,cx,cy,s,t,sinR,cosR){
     const rr=(x,y,w,h,r2)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r2);ctx.fill();};
+    const breathe=Math.sin(t*0.025)*1.8; // very slow breathing
+    const sway=Math.sin(t*0.018)*0.6;   // gentle body sway
+    const aimBob=Math.sin(t*0.03)*1.2;  // gun micro-bob (aiming hold)
+    const depthB=0.6+cosR*0.38;
 
-    // ── BACK LEG ──
-    ctx.save(); ctx.globalAlpha=depthB*0.78;
-    const blx=cx+sinR*s*0.065;
-    // thigh
-    ctx.fillStyle=ch.bodyColor;
-    ctx.save(); ctx.translate(blx,cy+s*0.16+bob); ctx.rotate((-legSwing*0.7)*Math.PI/180);
-    rr(-s*0.055,0,s*0.11,s*0.22,s*0.018); ctx.restore();
-    // shin
-    ctx.fillStyle=ch.jacketColor;
-    ctx.save(); ctx.translate(blx,cy+s*0.38+bob); ctx.rotate((legSwing*0.35)*Math.PI/180);
-    rr(-s*0.045,0,s*0.09,s*0.18,s*0.012); ctx.restore();
-    // boot
-    ctx.fillStyle='#111';
-    rr(blx-s*0.06,cy+s*0.54+bob,s*0.13,s*0.065,s*0.02);
+    // SHADOW
+    ctx.save(); ctx.globalAlpha=0.35;
+    ctx.fillStyle='rgba(0,0,0,0.65)';
+    ctx.beginPath(); ctx.ellipse(cx+sinR*s*0.06,cy+s*0.52,s*0.3,s*0.05,0,0,Math.PI*2); ctx.fill();
     ctx.restore();
 
-    // ── BACK ARM ──
-    ctx.save(); ctx.globalAlpha=depthB*0.72;
-    const bax=cx+sinR*s*0.16;
+    // ── LEGS — wide combat stance, static ──
+    const lOff=s*0.09; // leg spread
+    // Back leg
+    ctx.save(); ctx.globalAlpha=depthB*0.75;
+    ctx.fillStyle=ch.bodyColor;
+    rr(cx+sinR*s*0.05-s*0.055,cy+s*0.16+breathe,s*0.11,s*0.21,s*0.018);   // thigh
     ctx.fillStyle=ch.jacketColor;
-    ctx.save(); ctx.translate(bax,cy-s*0.17+bob); ctx.rotate((-armSwing*0.8)*Math.PI/180);
-    rr(-s*0.038,0,s*0.078,s*0.21,s*0.016); ctx.restore();
+    rr(cx+sinR*s*0.04-s*0.045,cy+s*0.37+breathe,s*0.09,s*0.19,s*0.012);  // shin
+    ctx.fillStyle='#111'; rr(cx+sinR*s*0.03-s*0.065,cy+s*0.555+breathe,s*0.14,s*0.065,s*0.02); // boot
+    ctx.restore();
+    // Front leg (slightly forward — combat crouch stance)
+    ctx.save(); ctx.globalAlpha=0.92;
+    ctx.fillStyle=ch.bodyColor;
+    ctx.save(); ctx.translate(cx-sinR*s*0.04+s*0.01,cy+s*0.17+breathe); ctx.rotate(-5*Math.PI/180);
+    rr(-s*0.058,0,s*0.115,s*0.23,s*0.018); ctx.restore();
+    ctx.fillStyle=ch.jacketColor;
+    ctx.save(); ctx.translate(cx-sinR*s*0.04+s*0.018,cy+s*0.395+breathe); ctx.rotate(8*Math.PI/180);
+    rr(-s*0.048,0,s*0.095,s*0.185,s*0.012); ctx.restore();
+    ctx.fillStyle='#0a0a0a'; rr(cx-sinR*s*0.04-s*0.055,cy+s*0.57+breathe,s*0.14,s*0.068,s*0.022);
+    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.6;
+    rr(cx-sinR*s*0.04-s*0.055,cy+s*0.57+breathe,s*0.14,s*0.016,s*0.022);
     ctx.restore();
 
-    // ── TORSO ──
-    ctx.save();
-    ctx.shadowBlur=16; ctx.shadowColor=ch.accentColor+'88';
-    // jacket body
-    const tw=s*0.32, tx=cx-tw/2+sinR*s*0.025;
+    // ── BACK ARM — raised, supporting gun ──
+    ctx.save(); ctx.globalAlpha=depthB*0.7;
     ctx.fillStyle=ch.jacketColor;
-    rr(tx,cy-s*0.28+breathe,tw,s*0.42,s*0.04);
-    // chest plate / tactical vest detail
-    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.55;
-    rr(tx+tw*0.15,cy-s*0.24+breathe,tw*0.7,s*0.14,s*0.02);
+    // Upper arm angled forward-up (supporting position)
+    ctx.save(); ctx.translate(cx+sinR*s*0.14,cy-s*0.18+breathe);
+    ctx.rotate(-55*Math.PI/180); // arm raised toward gun
+    rr(-s*0.035,0,s*0.072,s*0.18,s*0.014); ctx.restore();
+    // Forearm extended forward
+    ctx.save(); ctx.translate(cx+sinR*s*0.08,cy-s*0.32+breathe);
+    ctx.rotate(-15*Math.PI/180);
+    rr(-s*0.028,0,s*0.06,s*0.16,s*0.012); ctx.restore();
+    ctx.restore();
+
+    // ── TORSO — slight forward lean ──
+    ctx.save(); ctx.shadowBlur=18; ctx.shadowColor=ch.accentColor+'66';
+    ctx.save(); ctx.translate(cx,cy-s*0.05+breathe); ctx.rotate(sway*Math.PI/180);
+    const tw=s*0.31, tx=-tw/2+sinR*s*0.02;
+    // Body
+    ctx.fillStyle=ch.jacketColor; rr(tx,-s*0.24,tw,s*0.40,s*0.04);
+    // Chest plate
+    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.5;
+    rr(tx+tw*0.12,-s*0.20,tw*0.76,s*0.13,s*0.02);
     ctx.globalAlpha=1;
-    // collar
-    ctx.fillStyle=ch.bodyColor;
-    rr(cx-s*0.06,cy-s*0.28+breathe,s*0.12,s*0.08,s*0.02);
-    // belt
-    ctx.fillStyle='#111'; ctx.globalAlpha=0.6;
-    rr(tx,cy+s*0.12+breathe,tw,s*0.05,s*0.01);
+    // Vertical chest rib lines
+    ctx.globalAlpha=0.22+0.1*Math.sin(t*0.03);
+    ctx.strokeStyle=ch.accentColor; ctx.lineWidth=s*0.008; ctx.shadowBlur=7; ctx.shadowColor=ch.accentColor;
+    ctx.beginPath(); ctx.moveTo(tx+tw*0.12,-s*0.18); ctx.lineTo(tx+tw*0.12,-s*0.02); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tx+tw*0.88,-s*0.18); ctx.lineTo(tx+tw*0.88,-s*0.02); ctx.stroke();
+    ctx.globalAlpha=1; ctx.shadowBlur=0;
+    // Collar / neck
+    ctx.fillStyle=ch.bodyColor; rr(-s*0.06,-s*0.25,s*0.12,s*0.06,s*0.012);
+    // Belt
+    ctx.fillStyle='#0d0d0d'; ctx.globalAlpha=0.65; rr(tx,s*0.13,tw,s*0.05,s*0.01);
     ctx.globalAlpha=1;
+    ctx.restore();
     ctx.shadowBlur=0; ctx.restore();
 
     // ── HEAD ──
-    ctx.save();
-    ctx.shadowBlur=20; ctx.shadowColor=ch.accentColor+'66';
-    const hx=cx+sinR*s*0.04;
-    // neck
-    ctx.fillStyle=ch.bodyColor;
-    rr(hx-s*0.04,cy-s*0.34+bob,s*0.08,s*0.08,s*0.01);
-    // head base (face)
-    ctx.fillStyle=ch.bodyColor;
-    rr(hx-s*0.115,cy-s*0.50+bob,s*0.23,s*0.185,s*0.035);
-    // helmet
-    ctx.fillStyle=ch.jacketColor;
-    rr(hx-s*0.125,cy-s*0.52+bob,s*0.25,s*0.14,s*0.035);
-    // helmet visor
-    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.7;
-    rr(hx-s*0.09+sinR*s*0.02,cy-s*0.455+bob,s*0.17,s*0.055,s*0.015);
+    ctx.save(); ctx.shadowBlur=22; ctx.shadowColor=ch.accentColor+'55';
+    const hx=cx+sinR*s*0.035, hy=cy-s*0.38+breathe;
+    // Neck
+    ctx.fillStyle=ch.bodyColor; rr(hx-s*0.038,hy+s*0.14,s*0.075,s*0.075,s*0.01);
+    // Head shape
+    ctx.fillStyle=ch.bodyColor; rr(hx-s*0.115,hy,s*0.23,s*0.19,s*0.036);
+    // Tactical helmet
+    ctx.fillStyle=ch.jacketColor; rr(hx-s*0.125,hy-s*0.04,s*0.25,s*0.13,s*0.036);
+    // Helmet top ridge
+    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.4;
+    rr(hx-s*0.06,hy-s*0.06,s*0.12,s*0.02,s*0.005);
     ctx.globalAlpha=1;
-    // eye glow (through visor)
-    if(Math.abs(cosR)>0.15){
-      ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.9;
-      ctx.shadowBlur=10; ctx.shadowColor=ch.accentColor;
-      const eyeW=s*0.042*Math.max(0.1,Math.abs(cosR));
-      const eyeDir=cosR>0?1:-1;
-      ctx.beginPath(); ctx.ellipse(hx+eyeDir*s*0.035+sinR*s*0.03,cy-s*0.43+bob,eyeW,s*0.018,0,0,Math.PI*2); ctx.fill();
+    // Visor — full-face style
+    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.65;
+    rr(hx-s*0.095+sinR*s*0.018,hy+s*0.02,s*0.18,s*0.06,s*0.016);
+    ctx.globalAlpha=1;
+    // Visor glow eyes
+    if(Math.abs(cosR)>0.12){
+      ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.95;
+      ctx.shadowBlur=12; ctx.shadowColor=ch.accentColor;
+      const ed=cosR>0?1:-1;
+      ctx.beginPath(); ctx.ellipse(hx+ed*s*0.032+sinR*s*0.025,hy+s*0.048,s*0.038*Math.max(0.15,Math.abs(cosR)),s*0.016,0,0,Math.PI*2); ctx.fill();
       ctx.shadowBlur=0;
     }
     ctx.globalAlpha=1; ctx.shadowBlur=0;
-    // ear/side detail
-    ctx.fillStyle=ch.jacketColor;
-    rr(hx+(cosR>0?1:-1)*s*0.11+sinR*s*0.02,cy-s*0.475+bob,s*0.025,s*0.055,s*0.01);
+    // Side ear/comm device
+    ctx.fillStyle=ch.jacketColor; rr(hx+(cosR>0?s*0.11:-s*0.135)+sinR*s*0.02,hy+s*0.03,s*0.025,s*0.06,s*0.008);
     ctx.restore();
 
-    // ── FRONT LEG ──
-    ctx.save(); ctx.globalAlpha=depthF;
-    const flx=cx-sinR*s*0.065;
-    ctx.fillStyle=ch.bodyColor;
-    ctx.save(); ctx.translate(flx,cy+s*0.16+bob); ctx.rotate((legSwing*0.85)*Math.PI/180);
-    rr(-s*0.058,0,s*0.116,s*0.23,s*0.018); ctx.restore();
+    // ── FRONT ARM — raised to aim, elbow bent ──
+    ctx.save(); ctx.globalAlpha=0.95;
+    const armBaseX=cx-sinR*s*0.14, armBaseY=cy-s*0.22+breathe;
     ctx.fillStyle=ch.jacketColor;
-    ctx.save(); ctx.translate(flx,cy+s*0.385+bob); ctx.rotate((-legSwing*0.38)*Math.PI/180);
-    rr(-s*0.048,0,s*0.095,s*0.19,s*0.012); ctx.restore();
-    // boot
-    ctx.fillStyle='#111';
-    rr(flx-s*0.065,cy+s*0.565+bob,s*0.13,s*0.065,s*0.02);
-    // boot accent
-    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.65;
-    rr(flx-s*0.065,cy+s*0.565+bob,s*0.13,s*0.018,s*0.02);
-    ctx.globalAlpha=1; ctx.restore();
-
-    // ── FRONT ARM + WEAPON ──
-    ctx.save(); ctx.globalAlpha=depthF;
-    const fax=cx-sinR*s*0.16;
-    ctx.fillStyle=ch.jacketColor;
-    ctx.save(); ctx.translate(fax,cy-s*0.17+bob); ctx.rotate((armSwing*0.9)*Math.PI/180);
-    rr(-s*0.04,0,s*0.082,s*0.22,s*0.016); ctx.restore();
-    // hand
+    // Upper arm — angled up-forward
+    ctx.save(); ctx.translate(armBaseX,armBaseY); ctx.rotate(-65*Math.PI/180);
+    rr(-s*0.038,0,s*0.078,s*0.19,s*0.015); ctx.restore();
+    // Forearm — more forward, holding gun up
+    ctx.save(); ctx.translate(armBaseX+s*0.06,armBaseY-s*0.14); ctx.rotate(-10*Math.PI/180);
+    rr(-s*0.032,0,s*0.065,s*0.17,s*0.013); ctx.restore();
+    // Hand (fist grip)
     ctx.fillStyle=ch.bodyColor;
-    ctx.beginPath(); ctx.arc(fax+Math.sin(armSwing*Math.PI/180)*s*0.05,cy+s*0.06+bob,s*0.038,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(armBaseX+s*0.075,armBaseY-s*0.26,s*0.038,0,Math.PI*2); ctx.fill();
     ctx.restore();
 
-    // ── WEAPON (gun) ──
+    // ── WEAPON — raised to shoulder level, aiming pose ──
     ctx.save();
-    const gx=fax+sinR*s*0.06+Math.sin(armSwing*Math.PI/180)*s*0.04;
-    const gy=cy+s*0.07+bob;
+    // Gun position: held at shoulder-eye level, angled forward
+    const gx=cx+s*0.04+sinR*s*0.04;
+    const gy=cy-s*0.29+aimBob+breathe;
     ctx.translate(gx,gy);
-    ctx.rotate((armSwing*0.4-12)*Math.PI/180);
-    ctx.shadowBlur=10; ctx.shadowColor=ch.accentColor;
-    // Receiver
-    ctx.fillStyle='#18182a'; rr(-s*0.018,-s*0.022,s*0.115,s*0.048,s*0.008);
-    // Barrel
-    ctx.fillStyle='#0d0d1a'; rr(s*0.095,-s*0.014,s*0.075,s*0.026,s*0.005);
-    // Grip
-    ctx.fillStyle='#111'; rr(-s*0.005,s*0.022,s*0.04,s*0.07,s*0.008);
-    // Mag
-    ctx.fillStyle='#1a1a30'; rr(s*0.03,s*0.025,s*0.028,s*0.065,s*0.005);
-    // Accent stripe
-    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.9;
-    rr(-s*0.01,-s*0.021,s*0.082,s*0.012,s*0.003);
-    // Scope
-    ctx.fillStyle='#222'; ctx.globalAlpha=1; rr(s*0.02,-s*0.038,s*0.05,s*0.018,s*0.005);
-    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.55; rr(s*0.03,-s*0.035,s*0.03,s*0.012,s*0.003);
-    // Muzzle flash
-    if(Math.sin(frame*0.18)>0.88){
-      ctx.globalAlpha=0.75+Math.random()*0.25; ctx.fillStyle='#fff';
-      ctx.shadowColor='#fff'; ctx.shadowBlur=20;
-      ctx.beginPath(); ctx.arc(s*0.17,-s*0.001,s*0.022,0,Math.PI*2); ctx.fill();
+    ctx.rotate(-8*Math.PI/180); // slight upward aim angle
+    ctx.shadowBlur=14; ctx.shadowColor=ch.accentColor;
+
+    // Receiver body (main gun body)
+    ctx.fillStyle='#1c1c2e'; rr(-s*0.025,-s*0.025,s*0.18,s*0.055,s*0.01);
+    // Stock (back of gun)
+    ctx.fillStyle='#141420'; rr(-s*0.07,-s*0.018,s*0.048,s*0.038,s*0.007);
+    // Barrel (long, forward)
+    ctx.fillStyle='#0e0e1c'; rr(s*0.155,-s*0.012,s*0.1,s*0.028,s*0.005);
+    // Foregrip handguard
+    ctx.fillStyle='#181828'; rr(s*0.065,-s*0.018,s*0.065,s*0.075,s*0.008);
+    // Grip (pistol grip down)
+    ctx.fillStyle='#111'; rr(-s*0.005,s*0.028,s*0.042,s*0.078,s*0.009);
+    // Magazine
+    ctx.fillStyle='#1a1a30'; rr(s*0.04,s*0.03,s*0.032,s*0.075,s*0.006);
+    // Accent stripe on receiver
+    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.88;
+    rr(-s*0.018,-s*0.024,s*0.155,s*0.014,s*0.004);
+    // Scope rail
+    ctx.fillStyle='#222'; ctx.globalAlpha=1; rr(s*0.025,-s*0.044,s*0.08,s*0.02,s*0.005);
+    // Scope lens
+    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.55; rr(s*0.04,-s*0.042,s*0.04,s*0.015,s*0.004);
+    // Scope glow
+    ctx.shadowColor=ch.accentColor; ctx.shadowBlur=6;
+    ctx.fillStyle=ch.accentColor; ctx.globalAlpha=0.35;
+    ctx.beginPath(); ctx.arc(s*0.065,-s*0.035,s*0.01,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+
+    // Muzzle flash (periodic)
+    if(Math.sin(frame*0.14)>0.9){
+      ctx.globalAlpha=0.8+Math.random()*0.2;
+      ctx.shadowColor='#fff'; ctx.shadowBlur=22; ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(s*0.255,-s*0.002,s*0.02+Math.random()*s*0.01,0,Math.PI*2); ctx.fill();
+      // Flash lines
+      ctx.strokeStyle='rgba(255,200,100,0.7)'; ctx.lineWidth=s*0.006;
+      for(let fi=0;fi<4;fi++){
+        const fa=fi*Math.PI/2+Math.random()*0.3;
+        ctx.beginPath(); ctx.moveTo(s*0.255,-s*0.002); ctx.lineTo(s*0.255+Math.cos(fa)*s*0.028,-s*0.002+Math.sin(fa)*s*0.028); ctx.stroke();
+      }
     }
     ctx.globalAlpha=1; ctx.shadowBlur=0;
-    ctx.restore();
-
-    // ── ACCENT GLOW LINES on torso ──
-    ctx.save(); ctx.globalAlpha=0.15+0.08*Math.sin(t*0.04);
-    ctx.strokeStyle=ch.accentColor; ctx.lineWidth=1.2; ctx.shadowBlur=8; ctx.shadowColor=ch.accentColor;
-    ctx.beginPath(); ctx.moveTo(tx+tw*0.08,cy-s*0.22+breathe); ctx.lineTo(tx+tw*0.08,cy+s*0.10+breathe); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(tx+tw*0.92,cy-s*0.22+breathe); ctx.lineTo(tx+tw*0.92,cy+s*0.10+breathe); ctx.stroke();
     ctx.restore();
   }
 
@@ -2289,53 +2303,55 @@ function startCharPreview(){
     const bgC=document.getElementById('charBgCanvas');
     if(bgC){bgC.width=window.innerWidth;bgC.height=window.innerHeight;animateMenuBG(bgC);}
 
-    syncCanvas();
+    const ok=syncCanvas(); if(!ok) return;
     const dpr=window.devicePixelRatio||1;
-    const cw=cp.getBoundingClientRect().width, ch_=cp.getBoundingClientRect().height;
+    // Draw in logical pixels — canvas buffer is already DPR-scaled
+    const cw=cp.width/dpr, ch_=cp.height/dpr;
     if(!cw||!ch_) return;
+
     const ch=CHARS[charIdx];
     rotY+=rotSpd;
     const sinR=Math.sin(rotY), cosR=Math.cos(rotY);
 
-    cc.save(); cc.scale(dpr,dpr);
+    // Reset transform fully before each frame (no accumulation)
+    cc.setTransform(dpr,0,0,dpr,0,0);
     cc.clearRect(0,0,cw,ch_);
 
     // BG
     cc.fillStyle='rgba(3,1,10,0.97)'; cc.fillRect(0,0,cw,ch_);
-    const cbg=cc.createRadialGradient(cw/2,ch_*0.42,4,cw/2,ch_*0.42,cw*0.72);
-    cbg.addColorStop(0,ch.accentColor+'1e'); cbg.addColorStop(0.6,'rgba(5,2,15,0.88)'); cbg.addColorStop(1,'transparent');
+    const cbg=cc.createRadialGradient(cw/2,ch_*0.4,4,cw/2,ch_*0.4,Math.max(cw,ch_)*0.75);
+    cbg.addColorStop(0,ch.accentColor+'22'); cbg.addColorStop(0.6,'rgba(5,2,15,0.88)'); cbg.addColorStop(1,'transparent');
     cc.fillStyle=cbg; cc.fillRect(0,0,cw,ch_);
 
-    // Light beam from top
+    // Light beam
     const beam=cc.createLinearGradient(cw*0.35,0,cw*0.65,ch_);
-    beam.addColorStop(0,ch.accentColor+'16'); beam.addColorStop(0.6,'transparent');
-    cc.fillStyle=beam; cc.fillRect(cw*0.28,0,cw*0.44,ch_);
+    beam.addColorStop(0,ch.accentColor+'18'); beam.addColorStop(0.7,'transparent');
+    cc.fillStyle=beam; cc.fillRect(cw*0.22,0,cw*0.56,ch_);
 
     // Platform
-    const py=ch_*0.895;
-    cc.save(); cc.globalAlpha=0.12+0.05*Math.sin(rotY*2); cc.strokeStyle=ch.accentColor; cc.lineWidth=0.8;
-    for(let i=0;i<3;i++){ cc.beginPath(); cc.ellipse(cw/2,py,cw*(0.22+i*0.06),ch_*(0.018+i*0.006),0,0,Math.PI*2); cc.stroke(); }
+    const py=ch_*0.91;
+    cc.save(); cc.globalAlpha=0.14+0.05*Math.sin(rotY*2); cc.strokeStyle=ch.accentColor; cc.lineWidth=0.8;
+    for(let i=0;i<3;i++){ cc.beginPath(); cc.ellipse(cw/2,py,cw*(0.24+i*0.07),ch_*(0.016+i*0.005),0,0,Math.PI*2); cc.stroke(); }
     cc.restore();
-    cc.save(); cc.globalAlpha=0.42; cc.fillStyle='rgba(0,0,0,0.5)';
-    cc.beginPath(); cc.ellipse(cw/2,py,cw*0.3,ch_*0.022,0,0,Math.PI*2); cc.fill(); cc.restore();
-    cc.strokeStyle=ch.accentColor+'55'; cc.lineWidth=1.2;
-    cc.beginPath(); cc.ellipse(cw/2,py,cw*0.28,ch_*0.02,0,0,Math.PI*2); cc.stroke();
+    cc.save(); cc.globalAlpha=0.38; cc.fillStyle='rgba(0,0,0,0.55)';
+    cc.beginPath(); cc.ellipse(cw/2,py,cw*0.32,ch_*0.022,0,0,Math.PI*2); cc.fill(); cc.restore();
+    cc.strokeStyle=ch.accentColor+'55'; cc.lineWidth=1;
+    cc.beginPath(); cc.ellipse(cw/2,py,cw*0.30,ch_*0.02,0,0,Math.PI*2); cc.stroke();
 
-    // Character — always perfectly centered, scale = 55% of canvas height
-    const scale=ch_*0.55;
+    // Character — centered, scale based on canvas dimensions
+    const scale=Math.min(cw*0.82,ch_*0.62);
     const charCX=cw/2;
-    const charCY=py-scale*0.55; // feet near platform
+    const charCY=py-scale*0.54;
 
     drawChar(cc,ch,charCX,charCY,scale,frame,sinR,cosR);
 
     // Particles
-    if(frame%6===0){
-      const px=cw*0.1+Math.random()*cw*0.8,py2=ch_*0.08+Math.random()*ch_*0.7;
-      cc.save();cc.globalAlpha=0.18+Math.random()*0.22;cc.fillStyle=ch.accentColor;
-      cc.shadowBlur=7;cc.shadowColor=ch.accentColor;
-      cc.beginPath();cc.arc(px,py2,0.8+Math.random()*1.2,0,Math.PI*2);cc.fill();cc.restore();
+    if(frame%7===0){
+      const px=cw*0.08+Math.random()*cw*0.84, py2=ch_*0.06+Math.random()*ch_*0.72;
+      cc.save(); cc.globalAlpha=0.14+Math.random()*0.2; cc.fillStyle=ch.accentColor;
+      cc.shadowBlur=6; cc.shadowColor=ch.accentColor;
+      cc.beginPath(); cc.arc(px,py2,0.7+Math.random()*1.2,0,Math.PI*2); cc.fill(); cc.restore();
     }
-    cc.restore();
     frame++;
   }
   loop();
