@@ -146,87 +146,74 @@
 <div id="charSelectScreen" class="screen hidden">
   <canvas id="charBgCanvas" class="full-canvas"></canvas>
 
-  <!-- Ambient overlay -->
-  <div class="csel-ambient" aria-hidden="true"></div>
+  <!-- Popup backdrop (like settings) -->
+  <div class="modal-backdrop cs-popup-backdrop">
+    <div class="cs-popup">
+      <!-- Top accent line -->
+      <div class="cs-popup-topline"></div>
 
-  <div class="csel-wrap">
-    <!-- CLOSE -->
-    <button class="csel-close" id="btnCloseChar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-
-    <!-- HEADER -->
-    <div class="csel-header">
-      <div class="csel-header-tag">エージェント選択</div>
-      <div class="csel-header-title">SELECT AGENT</div>
-      <div class="csel-header-line"></div>
-    </div>
-
-    <!-- MAIN LAYOUT -->
-    <div class="csel-body">
-
-      <!-- LEFT: Character Preview -->
-      <div class="csel-left">
-        <!-- Nav arrows -->
-        <button class="csel-arrow csel-arrow-left" id="charPrev">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>
-        </button>
-
-        <!-- Preview stage -->
-        <div class="csel-stage">
-          <div class="csel-stage-glow" id="cselStageGlow"></div>
-          <canvas id="charPreviewCanvas" class="char-preview-canvas"></canvas>
-          <div class="csel-stage-floor"></div>
-          <!-- Floating rarity indicator on canvas -->
-          <div class="csel-rarity-float" id="csRarityBadge">◆ RARE</div>
+      <!-- Header -->
+      <div class="cs-popup-header">
+        <div>
+          <div class="cs-popup-sub">エージェント選択</div>
+          <div class="cs-popup-title">SELECT AGENT</div>
         </div>
-
-        <button class="csel-arrow csel-arrow-right" id="charNext">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
+        <button class="close-x modal-close" id="btnCloseChar">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-
-        <!-- Dots -->
-        <div class="csel-dots" id="charDots"></div>
       </div>
 
-      <!-- RIGHT: Character Info -->
-      <div class="csel-right">
-        <!-- Name block -->
-        <div class="csel-name-block">
-          <div class="csel-char-role" id="csCharRole">STREET OPS</div>
-          <div class="csel-char-name" id="csCharName">KENJI</div>
-          <div class="csel-name-underline" id="cselNameUnderline"></div>
+      <!-- Body: left preview + right info -->
+      <div class="cs-popup-body">
+
+        <!-- LEFT: stage with overlaid arrows -->
+        <div class="cs-popup-left">
+          <div class="cs-pop-stage">
+            <div class="cs-pop-stage-glow" id="cs2StageBg"></div>
+            <!-- Nav arrows overlaid on stage sides -->
+            <button class="cs-pop-nav cs-pop-nav-l" id="charPrev">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><polyline points="15,18 9,12 15,6"/></svg>
+            </button>
+            <canvas id="charPreviewCanvas" class="cs-pop-canvas"></canvas>
+            <button class="cs-pop-nav cs-pop-nav-r" id="charNext">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><polyline points="9,18 15,12 9,6"/></svg>
+            </button>
+            <div class="cs-pop-rarity" id="csRarityBadge">◆ RARE</div>
+            <!-- Dots inside stage at bottom -->
+            <div class="cs-pop-dots" id="charDots"></div>
+          </div>
         </div>
 
-        <!-- Divider -->
-        <div class="csel-divider"></div>
+        <!-- RIGHT: info -->
+        <div class="cs-popup-right">
+          <div class="cs-pop-role" id="csCharRole">STREET OPS</div>
+          <div class="cs-pop-name" id="csCharName">KENJI</div>
+          <div class="cs-pop-namebar" id="cs2NameBar"></div>
+          <p class="cs-pop-desc" id="csCharDesc">—</p>
 
-        <!-- Description -->
-        <p class="csel-char-desc" id="csCharDesc">—</p>
+          <div class="cs-pop-label">STATS</div>
+          <div id="csStats"></div>
 
-        <!-- Stats -->
-        <div class="csel-stats" id="csStats"></div>
+          <div class="cs-pop-label" style="margin-top:0.5rem">SKILL</div>
+          <div id="csSkillBlock"></div>
 
-        <!-- Skill -->
-        <div class="csel-skill-block" id="csSkillBlock"></div>
-
-        <!-- Weapon -->
-        <div class="csel-weapon-row">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h10M18 12h2M10 8v8"/></svg>
-          <span class="csel-weapon-label">WEAPON</span>
-          <span class="csel-weapon-val" id="csWeapon">—</span>
+          <div class="cs-pop-weapon">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h10M18 12h2M10 8v8"/></svg>
+            <span class="cs-pop-weapon-lbl">WEAPON</span>
+            <span class="cs-pop-weapon-val" id="csWeapon">—</span>
+          </div>
         </div>
+
+      </div><!-- /body -->
+
+      <!-- Footer -->
+      <div class="cs-popup-footer">
+        <div class="cs-pop-active" id="csSelectedTag">ACTIVE: —</div>
+        <button class="confirm-btn cs-pop-confirm" id="btnConfirmChar">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+          DEPLOY AGENT
+        </button>
       </div>
-
-    </div><!-- /csel-body -->
-
-    <!-- BOTTOM BAR -->
-    <div class="csel-bottom">
-      <div class="csel-active-tag" id="csSelectedTag">ACTIVE: —</div>
-      <button class="csel-confirm-btn" id="btnConfirmChar">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
-        DEPLOY AGENT
-      </button>
     </div>
   </div>
 </div>
