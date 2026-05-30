@@ -179,13 +179,7 @@ let W=0, H=0, GY=0;
 function resizeCanvas(){
   W=canvas.width=window.innerWidth;
   H=canvas.height=window.innerHeight;
-  canvas.style.width='';
-  canvas.style.height='';
-  ctx.setTransform(1,0,0,1,0,0);
   GY=H*CFG.GROUND_Y_RATIO;
-  // Player size: fixed, no scaling — same size as original design
-  Player.w=CFG.PLAYER_W;
-  Player.h=CFG.PLAYER_H;
   if(S.screen==='playing'||S.screen==='paused') genBG();
 }
 window.addEventListener('resize',resizeCanvas);
@@ -2931,8 +2925,8 @@ function startCharPreview(){
 
     // ── DRAW CHARACTER ────────────────────────────────────
     const py=ch_*0.93;
-    const scale=Math.min(cw*0.58,ch_*0.65);
-    drawSoldier(cc,ch,cw*0.5,py,scale,frame,breathe,sway);
+    const scale=Math.min(cw*0.52,ch_*0.62);
+    drawSoldier(cc,ch,cw/2+sinR*scale,py,scale,frame,breathe,sway);
 
     frame++;
   }
