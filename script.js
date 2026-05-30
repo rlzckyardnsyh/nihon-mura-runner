@@ -873,19 +873,18 @@ function drawBG(){
   // ── GREEN HILLS (spring/morning only) ──
   if(env.isBright||env.id==='morning'){
     ctx.save(); ctx.globalAlpha=env.id==='morning'?0.50:0.68;
-    // gradient from hill tops down to ground
-    const hillTop=GY*0.62, hillBot=GY+4;
-    const hG=ctx.createLinearGradient(0,hillTop,0,hillBot);
-    hG.addColorStop(0,'rgba(68,138,48,0.88)'); hG.addColorStop(1,'rgba(44,98,22,0.72)');
+    // Extend far below screen so road never shows gap under hills
+    const hillBot=H+20;
+    const hG=ctx.createLinearGradient(0,GY*0.55,0,GY);
+    hG.addColorStop(0,'rgba(68,138,48,0.88)'); hG.addColorStop(1,'rgba(44,98,22,0.80)');
     ctx.fillStyle=hG;
     ctx.beginPath();
-    // start bottom-left below ground
-    ctx.moveTo(-10,hillBot);
+    ctx.moveTo(-10, hillBot);
     const hOff2=(worldOff*0.04)%W;
-    // wave peaks sit at GY*0.62..0.72, so base is always at/below GY
-    for(let hx=-hOff2;hx<=W+W;hx+=W/14)
-      ctx.lineTo(hx, GY*(0.64+0.08*Math.sin(hx*0.016+0.8)));
-    ctx.lineTo(W+10,hillBot);
+    // Wave peaks between GY*0.60 and GY*0.72 — always above ground
+    for(let hx=-hOff2; hx<=W+W; hx+=W/14)
+      ctx.lineTo(hx, GY*(0.62+0.08*Math.sin(hx*0.016+0.8)));
+    ctx.lineTo(W+10, hillBot);
     ctx.closePath(); ctx.fill(); ctx.restore();
   }
 
@@ -897,8 +896,8 @@ function drawBG(){
     const th=22+((ti*7)%18);
     const tr=env.id==='cyber'?`rgba(80,0,160,0.80)`:env.id==='night'?`rgba(12,18,30,0.90)`:`rgba(38,${100+((ti*9)%40)|0},22,0.82)`;
     ctx.fillStyle=tr;
-    // arc base at GY - so trees sit on ground
-    ctx.beginPath(); ctx.arc(tx,GY-th*0.52,th*0.52,0,Math.PI*2); ctx.fill();
+    // Trees sit on top of hills, not floating
+    ctx.beginPath(); ctx.arc(tx, GY*0.76, th*0.52, 0, Math.PI*2); ctx.fill();
   }
   ctx.restore();
 
