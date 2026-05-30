@@ -176,14 +176,21 @@ const S = {
 const canvas = document.getElementById('gameCanvas');
 const ctx    = canvas.getContext('2d');
 let W=0, H=0, GY=0;
+// Device pixel ratio — cap at 2.5 for performance on mid-range phones
+const DPR=Math.min(window.devicePixelRatio||1, 2.5);
+
 function resizeCanvas(){
-  W=canvas.width=window.innerWidth;
-  H=canvas.height=window.innerHeight;
-  canvas.style.width='';
-  canvas.style.height='';
-  ctx.setTransform(1,0,0,1,0,0);
+  // CSS/logical size (game coordinates always in CSS pixels)
+  W=window.innerWidth;
+  H=window.innerHeight;
+  // Physical buffer size (sharp on retina/high-DPI screens)
+  canvas.width = Math.round(W*DPR);
+  canvas.height= Math.round(H*DPR);
+  canvas.style.width = W+'px';
+  canvas.style.height= H+'px';
+  // Scale ctx ONCE — all game drawing uses CSS pixel coords, GPU handles the scaling
+  ctx.setTransform(DPR,0,0,DPR,0,0);
   GY=H*CFG.GROUND_Y_RATIO;
-  // Player size: fixed, no scaling — same size as original design
   Player.w=CFG.PLAYER_W;
   Player.h=CFG.PLAYER_H;
   if(S.screen==='playing'||S.screen==='paused') genBG();
@@ -191,6 +198,7 @@ function resizeCanvas(){
 window.addEventListener('resize',resizeCanvas);
 canvas.addEventListener('mousemove',e=>{ const r=canvas.getBoundingClientRect(); S.mx=e.clientX-r.left; S.my=e.clientY-r.top; });
 canvas.addEventListener('click',e=>{ if(S.screen==='playing'){ const r=canvas.getBoundingClientRect(); S.mx=e.clientX-r.left; S.my=e.clientY-r.top; K.shoot=true; if(!aCtx)initAudio(); } });
+canvas.addEventListener('touchmove',e=>{ if(S.screen==='playing'){ const r=canvas.getBoundingClientRect(),t=e.touches[0]; S.mx=t.clientX-r.left; S.my=t.clientY-r.top; }},{passive:true});
 
 // =====================================================
 // § 7  INPUT
@@ -2153,7 +2161,10 @@ function gameLoop(ts){
   $spdD.textContent=(S.speed/CFG.BASE_SPEED).toFixed(1)+'×';
   ctx.save();ctx.translate(S.shakeX,S.shakeY);
   drawBG();drawObs();drawBullets();drawPwrs();drawCoins();drawHearts();drawEnemies();Player.draw();drawP();drawFT();
-  ctx.restore();drawVignette();drawDamageFlash();
+  ctx.restore();
+  // Re-apply DPR scale after restore (restore resets to identity on some browsers)
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  drawVignette();drawDamageFlash();
   clearTrig();
   if(Player.hp<=0){gameOver();return;}
   rafId=requestAnimationFrame(gameLoop);
@@ -2178,9 +2189,11 @@ function initMenuBG(){
 
 function animateMenuBG(mc){
   if(!mc)return;
-  mc.width=window.innerWidth; mc.height=window.innerHeight;
+  mc.width=Math.round(window.innerWidth*DPR); mc.height=Math.round(window.innerHeight*DPR);
+  mc.style.width=window.innerWidth+'px'; mc.style.height=window.innerHeight+'px';
   const mCtx=mc.getContext('2d');
-  const W2=mc.width, H2=mc.height, env=getEnv();
+  mCtx.setTransform(DPR,0,0,DPR,0,0);
+  const W2=window.innerWidth, H2=window.innerHeight, env=getEnv();
   menuBGFrame++; const spd=1.5;
   mCtx.clearRect(0,0,W2,H2);
 
@@ -2467,8 +2480,8 @@ function startCharPreview(){
   let frame=0,rotY=0;
 
   function syncCanvas(){
-    const r=cp.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
-    const w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);
+    const r=cp.getBoundingClientRect();
+    const w=Math.round(r.width*DPR),h=Math.round(r.height*DPR);
     if(w<1||h<1)return false;
     if(cp.width!==w||cp.height!==h){cp.width=w;cp.height=h;}
     return true;
@@ -2765,11 +2778,10 @@ function startCharPreview(){
     if(S.screen!=='charselect'){cancelAnimationFrame(charAnimId);charAnimId=null;return;}
 
     const bgC=document.getElementById('charBgCanvas');
-    if(bgC){bgC.width=window.innerWidth;bgC.height=window.innerHeight;animateMenuBG(bgC);}
+    if(bgC) animateMenuBG(bgC);
 
     const ok=syncCanvas();if(!ok)return;
-    const dpr=window.devicePixelRatio||1;
-    const cw=cp.width/dpr,ch_=cp.height/dpr;
+    const cw=cp.width/DPR,ch_=cp.height/DPR;
     if(!cw||!ch_)return;
 
     const ch=CHARS[charIdx];
@@ -2781,7 +2793,7 @@ function startCharPreview(){
     const sway=Math.sin(t*0.8)*0.5;                // -0.5..0.5 idle sway
     const sinR=Math.sin(rotY)*0.04;
 
-    cc.setTransform(dpr,0,0,dpr,0,0);
+    cc.setTransform(DPR,0,0,DPR,0,0);
     cc.clearRect(0,0,cw,ch_);
 
     // ══════════════════════════════════════════════════════
@@ -2957,7 +2969,7 @@ document.getElementById('charNext').addEventListener('click',()=>{charIdx=(charI
 function openEnvSelect(){
   S.screen='envselect';showScreen('envSelectScreen');buildEnvCards();if(!aCtx)initAudio();
   const bg=document.getElementById('envBgCanvas');let envAnimId=null;
-  function anim(){if(S.screen!=='envselect'){cancelAnimationFrame(envAnimId);return;}if(bg){bg.width=window.innerWidth;bg.height=window.innerHeight;animateMenuBG(bg);}envAnimId=requestAnimationFrame(anim);}
+  function anim(){if(S.screen!=='envselect'){cancelAnimationFrame(envAnimId);return;}if(bg)animateMenuBG(bg);envAnimId=requestAnimationFrame(anim);}
   envAnimId=requestAnimationFrame(anim);
 }
 function buildEnvCards(){
