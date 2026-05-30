@@ -177,21 +177,15 @@ const canvas = document.getElementById('gameCanvas');
 const ctx    = canvas.getContext('2d');
 let W=0, H=0, GY=0;
 function resizeCanvas(){
-  const dpr=window.devicePixelRatio||1;
-  const effectiveDpr=Math.min(dpr,2);
-  W=window.innerWidth;
-  H=window.innerHeight;
-  canvas.width=Math.round(W*effectiveDpr);
-  canvas.height=Math.round(H*effectiveDpr);
-  canvas.style.width=W+'px';
-  canvas.style.height=H+'px';
-  ctx.setTransform(effectiveDpr,0,0,effectiveDpr,0,0);
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+  canvas.style.width='';
+  canvas.style.height='';
+  ctx.setTransform(1,0,0,1,0,0);
   GY=H*CFG.GROUND_Y_RATIO;
-  // Scale player size proportionally to screen height
-  // Base size designed for ~700px height — scale down on small screens
-  const scale=Math.min(1, H/700);
-  Player.w=Math.round(CFG.PLAYER_W*scale);
-  Player.h=Math.round(CFG.PLAYER_H*scale);
+  // Player size: fixed, no scaling — same size as original design
+  Player.w=CFG.PLAYER_W;
+  Player.h=CFG.PLAYER_H;
   if(S.screen==='playing'||S.screen==='paused') genBG();
 }
 window.addEventListener('resize',resizeCanvas);
@@ -2937,8 +2931,8 @@ function startCharPreview(){
 
     // ── DRAW CHARACTER ────────────────────────────────────
     const py=ch_*0.93;
-    const scale=Math.min(cw*0.52,ch_*0.62);
-    drawSoldier(cc,ch,cw/2+sinR*scale,py,scale,frame,breathe,sway);
+    const scale=Math.min(cw*0.58,ch_*0.65);
+    drawSoldier(cc,ch,cw*0.5,py,scale,frame,breathe,sway);
 
     frame++;
   }
