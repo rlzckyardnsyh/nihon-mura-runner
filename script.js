@@ -177,9 +177,21 @@ const canvas = document.getElementById('gameCanvas');
 const ctx    = canvas.getContext('2d');
 let W=0, H=0, GY=0;
 function resizeCanvas(){
-  W=canvas.width=window.innerWidth;
-  H=canvas.height=window.innerHeight;
+  const dpr=window.devicePixelRatio||1;
+  const effectiveDpr=Math.min(dpr,2);
+  W=window.innerWidth;
+  H=window.innerHeight;
+  canvas.width=Math.round(W*effectiveDpr);
+  canvas.height=Math.round(H*effectiveDpr);
+  canvas.style.width=W+'px';
+  canvas.style.height=H+'px';
+  ctx.setTransform(effectiveDpr,0,0,effectiveDpr,0,0);
   GY=H*CFG.GROUND_Y_RATIO;
+  // Scale player size proportionally to screen height
+  // Base size designed for ~700px height — scale down on small screens
+  const scale=Math.min(1, H/700);
+  Player.w=Math.round(CFG.PLAYER_W*scale);
+  Player.h=Math.round(CFG.PLAYER_H*scale);
   if(S.screen==='playing'||S.screen==='paused') genBG();
 }
 window.addEventListener('resize',resizeCanvas);
