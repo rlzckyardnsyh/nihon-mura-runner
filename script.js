@@ -841,7 +841,7 @@ function drawBG(){
   clouds.forEach(c=>drawCloud(c.x,c.y,c.w,c.h,env.cloudAlpha??0.88,env.cloudCol??'#ffffff'));
 
   // ── MT. FUJI / MOUNTAIN ──
-  const fjX=W*0.60, fjBase=GY*0.98, fjW=W*0.56, fjH=GY*0.74;
+  const fjX=W*0.60, fjBase=GY, fjW=W*0.56, fjH=GY*0.74;
   const mc=env.mountCol||['rgba(140,150,165,0.90)','rgba(100,115,138,0.88)','rgba(72,85,110,0.88)','rgba(50,62,85,0.82)'];
   ctx.save();
   // Haze layer
@@ -873,12 +873,20 @@ function drawBG(){
   // ── GREEN HILLS (spring/morning only) ──
   if(env.isBright||env.id==='morning'){
     ctx.save(); ctx.globalAlpha=env.id==='morning'?0.50:0.68;
-    const hG=ctx.createLinearGradient(0,GY*0.52,0,GY*0.80);
-    hG.addColorStop(0,'rgba(68,138,48,0.88)'); hG.addColorStop(1,'rgba(44,98,22,0.60)');
-    ctx.fillStyle=hG; ctx.beginPath(); ctx.moveTo(-10,GY*0.80);
+    // gradient from hill tops down to ground
+    const hillTop=GY*0.62, hillBot=GY+4;
+    const hG=ctx.createLinearGradient(0,hillTop,0,hillBot);
+    hG.addColorStop(0,'rgba(68,138,48,0.88)'); hG.addColorStop(1,'rgba(44,98,22,0.72)');
+    ctx.fillStyle=hG;
+    ctx.beginPath();
+    // start bottom-left below ground
+    ctx.moveTo(-10,hillBot);
     const hOff2=(worldOff*0.04)%W;
-    for(let hx=-hOff2;hx<=W+W;hx+=W/14) ctx.lineTo(hx,GY*(0.52+0.09*Math.sin(hx*0.016+0.8)));
-    ctx.lineTo(W+10,GY*0.80); ctx.closePath(); ctx.fill(); ctx.restore();
+    // wave peaks sit at GY*0.62..0.72, so base is always at/below GY
+    for(let hx=-hOff2;hx<=W+W;hx+=W/14)
+      ctx.lineTo(hx, GY*(0.64+0.08*Math.sin(hx*0.016+0.8)));
+    ctx.lineTo(W+10,hillBot);
+    ctx.closePath(); ctx.fill(); ctx.restore();
   }
 
   // ── TREELINE ──
@@ -889,7 +897,8 @@ function drawBG(){
     const th=22+((ti*7)%18);
     const tr=env.id==='cyber'?`rgba(80,0,160,0.80)`:env.id==='night'?`rgba(12,18,30,0.90)`:`rgba(38,${100+((ti*9)%40)|0},22,0.82)`;
     ctx.fillStyle=tr;
-    ctx.beginPath(); ctx.arc(tx,GY*0.79,th*0.52,0,Math.PI*2); ctx.fill();
+    // arc base at GY - so trees sit on ground
+    ctx.beginPath(); ctx.arc(tx,GY-th*0.52,th*0.52,0,Math.PI*2); ctx.fill();
   }
   ctx.restore();
 
